@@ -71,24 +71,32 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
       icon: renderIcon(Marchant, "/category-management"),
       label: (
         <Link to="/category-management">
-          {collapsed ? "" : "Category Management"}
+          {collapsed ? "" : "Service Category "}
         </Link>
       ),
     },
-    {
-      key: "/customerManagement",
-      icon: renderIcon(People, "/customerManagement"),
+    // {
+    //   key: "/customerManagement",
+    //   icon: renderIcon(People, "/customerManagement"),
+    //   label: (
+    //     <Link to="/customerManagement">
+    //       {collapsed ? "" : "Customer Profile"}
+    //     </Link>
+    //   ),
+    // },
+    // {
+    //   key: "/tierSystem",
+    //   icon: renderIcon(People, "/tierSystem"),
+    //   label: (
+    //     <Link to="/tierSystem">{collapsed ? "" : "Point & Tier System"}</Link>
+    //   ),
+    // },
+
+        {
+      key: "/userManagement",
+      icon: renderIcon(loginCredentials, "/userManagement"),
       label: (
-        <Link to="/customerManagement">
-          {collapsed ? "" : "Customer Profile"}
-        </Link>
-      ),
-    },
-    {
-      key: "/tierSystem",
-      icon: renderIcon(People, "/tierSystem"),
-      label: (
-        <Link to="/tierSystem">{collapsed ? "" : "Point & Tier System"}</Link>
+        <Link to="/userManagement">{collapsed ? "" : "User Management"}</Link>
       ),
     },
     {
@@ -130,22 +138,16 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
     //   icon: renderIcon(AuditLog, "/auditLogs"),
     //   label: <Link to="/auditLogs">{collapsed ? "" : "Audit Logs"}</Link>,
     // },
-    {
-      key: "/userManagement",
-      icon: renderIcon(loginCredentials, "/userManagement"),
-      label: (
-        <Link to="/userManagement">{collapsed ? "" : "User Management"}</Link>
-      ),
-    },
-    {
-      key: "/pushNotification",
-      icon: renderIcon(loginCredentials, "/pushNotification"),
-      label: (
-        <Link to="/pushNotification">
-          {collapsed ? "" : "Push Notifications"}
-        </Link>
-      ),
-    },
+
+    // {
+    //   key: "/pushNotification",
+    //   icon: renderIcon(loginCredentials, "/pushNotification"),
+    //   label: (
+    //     <Link to="/pushNotification">
+    //       {collapsed ? "" : "Push Notifications"}
+    //     </Link>
+    //   ),
+    // },
     {
       key: "subMenuSetting",
       icon: renderIcon(Settings, "subMenuSetting"),

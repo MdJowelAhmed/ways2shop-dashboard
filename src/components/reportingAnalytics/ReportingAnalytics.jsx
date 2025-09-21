@@ -48,115 +48,115 @@ const components = {
   },
 };
 
-// Sample data
+// Sample data with updated fields
 const data = [
   {
     sl: 1,
     date: "Jan 2025",
     category: "Employee",
     region: "USA",
-    Revenue: 100,
-    Users: 65,
-    "Points Redeemed": 32,
+    "Subscription Revenue": 100,
+    "Service Provider": 65,
+    "Customers": 32,
   },
   {
     sl: 2,
     date: "Feb 2025",
     category: "Employee",
     region: "USA",
-    Revenue: 75,
-    Users: 60,
-    "Points Redeemed": 27,
+    "Subscription Revenue": 75,
+    "Service Provider": 60,
+    "Customers": 27,
   },
   {
     sl: 3,
     date: "Mar 2025",
     category: "Employee",
     region: "USA",
-    Revenue: 50,
-    Users: 62,
-    "Points Redeemed": 22,
+    "Subscription Revenue": 50,
+    "Service Provider": 62,
+    "Customers": 22,
   },
   {
     sl: 4,
     date: "Apr 2025",
     category: "Employee",
     region: "UK",
-    Revenue: 69,
-    Users: 54,
-    "Points Redeemed": 29,
+    "Subscription Revenue": 69,
+    "Service Provider": 54,
+    "Customers": 29,
   },
   {
     sl: 5,
     date: "May 2025",
     category: "Employee",
     region: "UK",
-    Revenue: 47,
-    Users: 59,
-    "Points Redeemed": 24,
+    "Subscription Revenue": 47,
+    "Service Provider": 59,
+    "Customers": 24,
   },
   {
     sl: 6,
     date: "Jun 2025",
     category: "Employee",
     region: "UK",
-    Revenue: 60,
-    Users: 68,
-    "Points Redeemed": 37,
+    "Subscription Revenue": 60,
+    "Service Provider": 68,
+    "Customers": 37,
   },
   {
     sl: 7,
     date: "Jul 2025",
     category: "Employee",
     region: "USA",
-    Revenue: 88,
-    Users: 57,
-    "Points Redeemed": 45,
+    "Subscription Revenue": 88,
+    "Service Provider": 57,
+    "Customers": 45,
   },
   {
     sl: 8,
     date: "Aug 2025",
     category: "Employee",
     region: "USA",
-    Revenue: 88,
-    Users: 57,
-    "Points Redeemed": 45,
+    "Subscription Revenue": 88,
+    "Service Provider": 57,
+    "Customers": 45,
   },
   {
     sl: 9,
     date: "Sep 2025",
     category: "Customer",
     region: "UK",
-    Revenue: 38,
-    Users: 57,
-    "Points Redeemed": 100,
+    "Subscription Revenue": 38,
+    "Service Provider": 57,
+    "Customers": 100,
   },
   {
     sl: 10,
     date: "Oct 2025",
     category: "Customer",
     region: "UK",
-    Revenue: 88,
-    Users: 57,
-    "Points Redeemed": 45,
+    "Subscription Revenue": 88,
+    "Service Provider": 57,
+    "Customers": 45,
   },
   {
     sl: 11,
     date: "Nov 2025",
     category: "Customer",
     region: "USA",
-    Revenue: 88,
-    Users: 57,
-    "Points Redeemed": 45,
+    "Subscription Revenue": 88,
+    "Service Provider": 57,
+    "Customers": 45,
   },
   {
     sl: 12,
     date: "Dec 2025",
     category: "Customer",
     region: "USA",
-    Revenue: 88,
-    Users: 57,
-    "Points Redeemed": 45,
+    "Subscription Revenue": 88,
+    "Service Provider": 57,
+    "Customers": 45,
   },
 ];
 
@@ -167,12 +167,12 @@ const categoryOptions = [
   ...new Set(data.map((d) => d.category)),
 ];
 const regionOptions = ["All Regions", ...new Set(data.map((d) => d.region))];
-const metricOptions = ["Revenue", "Users", "Points Redeemed"];
+const metricOptions = ["Subscription Revenue", "Service Provider", "Customers"];
 
 const maxValues = {
-  Revenue: Math.max(...data.map((d) => d.Revenue)),
-  Users: Math.max(...data.map((d) => d.Users)),
-  "Points Redeemed": Math.max(...data.map((d) => d["Points Redeemed"])),
+  "Subscription Revenue": Math.max(...data.map((d) => d["Subscription Revenue"])),
+  "Service Provider": Math.max(...data.map((d) => d["Service Provider"])),
+  "Customers": Math.max(...data.map((d) => d["Customers"])),
 };
 
 // Custom 3D Bar with watermark
@@ -276,12 +276,22 @@ export default function MonthlyStatsChart() {
       render: (_, __, index) => index + 1,
     },
     { title: "Date", dataIndex: "date", key: "date", align: "center" },
-    { title: "Revenue", dataIndex: "Revenue", key: "Revenue", align: "center" },
-    { title: "Users", dataIndex: "Users", key: "Users", align: "center" },
+    { 
+      title: "Subscription Revenue", 
+      dataIndex: "Subscription Revenue", 
+      key: "Subscription Revenue", 
+      align: "center" 
+    },
+    { 
+      title: "Service Provider", 
+      dataIndex: "Service Provider", 
+      key: "Service Provider", 
+      align: "center" 
+    },
     {
-      title: "Points Redeemed",
-      dataIndex: "Points Redeemed",
-      key: "Points Redeemed",
+      title: "Customers",
+      dataIndex: "Customers",
+      key: "Customers",
       align: "center",
     },
   ];
@@ -308,50 +318,18 @@ export default function MonthlyStatsChart() {
             </Option>
           ))}
         </Select>
-        {/* <Select value={toMonth} style={{ width: 150 }} onChange={setToMonth}>
-          {monthYearOptions.map((option) => (
-            <Option key={option} value={option}>
-              {option}
-            </Option>
-          ))}
-        </Select> */}
 
         <Select
-          value={selectedRegion}
+          value={selectedCategory}
           style={{ width: 150 }}
-          onChange={setSelectedRegion}
+          onChange={setSelectedCategory}
         >
-          {regionOptions.map((option) => (
+          {categoryOptions.map((option) => (
             <Option key={option} value={option}>
               {option}
             </Option>
           ))}
         </Select>
-
-        {/* <Select
-          value={selectedMetric}
-          style={{ width: 150 }}
-          onChange={setSelectedMetric}
-        >
-          <Option value="all">All Metrics</Option>
-          {metricOptions.map((option) => (
-            <Option key={option} value={option}>
-              {option}
-            </Option>
-          ))}
-        </Select> */}
-
-        {/* <Select
-          value={chartType}
-          style={{ width: 150 }}
-          onChange={setChartType}
-        >
-          <Option value="Bar">Bar Chart</Option>
-          <Option value="Line">Line Chart</Option>
-          <Option value="Area">Area Chart</Option>
-        </Select> */}
-
-        {/* <Button>Export Report</Button> */}
       </div>
 
       {/* Chart */}
@@ -372,33 +350,33 @@ export default function MonthlyStatsChart() {
               <YAxis />
               <Tooltip />
               <Legend />
-              {(selectedMetric === "all" || selectedMetric === "Revenue") && (
+              {(selectedMetric === "all" || selectedMetric === "Subscription Revenue") && (
                 <Bar
-                  dataKey="Revenue"
+                  dataKey="Subscription Revenue"
                   fill="#7086FD"
                   shape={(props) => (
-                    <Custom3DBarWithWatermark {...props} dataKey="Revenue" />
+                    <Custom3DBarWithWatermark {...props} dataKey="Subscription Revenue" />
                   )}
                 />
               )}
-              {(selectedMetric === "all" || selectedMetric === "Users") && (
+              {(selectedMetric === "all" || selectedMetric === "Service Provider") && (
                 <Bar
-                  dataKey="Users"
+                  dataKey="Service Provider"
                   fill="#6FD195"
                   shape={(props) => (
-                    <Custom3DBarWithWatermark {...props} dataKey="Users" />
+                    <Custom3DBarWithWatermark {...props} dataKey="Service Provider" />
                   )}
                 />
               )}
               {(selectedMetric === "all" ||
-                selectedMetric === "Points Redeemed") && (
+                selectedMetric === "Customers") && (
                 <Bar
-                  dataKey="Points Redeemed"
+                  dataKey="Customers"
                   fill="#FFAE4C"
                   shape={(props) => (
                     <Custom3DBarWithWatermark
                       {...props}
-                      dataKey="Points Redeemed"
+                      dataKey="Customers"
                     />
                   )}
                 />
@@ -414,17 +392,17 @@ export default function MonthlyStatsChart() {
               <YAxis />
               <Tooltip />
               <Legend />
-              {(selectedMetric === "all" || selectedMetric === "Revenue") && (
-                <Line type="monotone" dataKey="Revenue" stroke="#7086FD" />
+              {(selectedMetric === "all" || selectedMetric === "Subscription Revenue") && (
+                <Line type="monotone" dataKey="Subscription Revenue" stroke="#7086FD" />
               )}
-              {(selectedMetric === "all" || selectedMetric === "Users") && (
-                <Line type="monotone" dataKey="Users" stroke="#6FD195" />
+              {(selectedMetric === "all" || selectedMetric === "Service Provider") && (
+                <Line type="monotone" dataKey="Service Provider" stroke="#6FD195" />
               )}
               {(selectedMetric === "all" ||
-                selectedMetric === "Points Redeemed") && (
+                selectedMetric === "Customers") && (
                 <Line
                   type="monotone"
-                  dataKey="Points Redeemed"
+                  dataKey="Customers"
                   stroke="#FFAE4C"
                 />
               )}
@@ -439,27 +417,27 @@ export default function MonthlyStatsChart() {
               <YAxis />
               <Tooltip />
               <Legend />
-              {(selectedMetric === "all" || selectedMetric === "Revenue") && (
+              {(selectedMetric === "all" || selectedMetric === "Subscription Revenue") && (
                 <Area
                   type="monotone"
-                  dataKey="Revenue"
+                  dataKey="Subscription Revenue"
                   stroke="#7086FD"
                   fill="#7086FD"
                 />
               )}
-              {(selectedMetric === "all" || selectedMetric === "Users") && (
+              {(selectedMetric === "all" || selectedMetric === "Service Provider") && (
                 <Area
                   type="monotone"
-                  dataKey="Users"
+                  dataKey="Service Provider"
                   stroke="#6FD195"
                   fill="#6FD195"
                 />
               )}
               {(selectedMetric === "all" ||
-                selectedMetric === "Points Redeemed") && (
+                selectedMetric === "Customers") && (
                 <Area
                   type="monotone"
-                  dataKey="Points Redeemed"
+                  dataKey="Customers"
                   stroke="#FFAE4C"
                   fill="#FFAE4C"
                 />
@@ -480,7 +458,10 @@ export default function MonthlyStatsChart() {
           className="custom-table"
           columns={columns.filter(
             (col) =>
-              selectedMetric === "all" || col.dataIndex === selectedMetric
+              selectedMetric === "all" || 
+              col.dataIndex === selectedMetric ||
+              col.dataIndex === "date" ||
+              col.dataIndex === "sl"
           )}
           dataSource={filteredData.map((row, index) => ({
             ...row,
