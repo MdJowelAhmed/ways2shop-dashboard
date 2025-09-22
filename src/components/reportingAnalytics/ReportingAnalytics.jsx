@@ -13,40 +13,6 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import { Table, Select, Button } from "antd";
-import "antd/dist/reset.css";
-
-const { Option } = Select;
-
-const components = {
-  header: {
-    row: (props) => (
-      <tr
-        {...props}
-        style={{
-          backgroundColor: "#f0f5f9",
-          height: "50px",
-          color: "secondary",
-          fontSize: "18px",
-          textAlign: "center",
-          padding: "12px",
-        }}
-      />
-    ),
-    cell: (props) => (
-      <th
-        {...props}
-        style={{
-          color: "secondary",
-          fontWeight: "bold",
-          fontSize: "18px",
-          textAlign: "center",
-          padding: "12px",
-        }}
-      />
-    ),
-  },
-};
 
 // Sample data with updated fields
 const data = [
@@ -163,11 +129,11 @@ const data = [
 // Dropdown options
 const monthYearOptions = [...new Set(data.map((d) => d.date))];
 const categoryOptions = [
-  "All Categories",
-  ...new Set(data.map((d) => d.category)),
+  "All",
+  "Subscription Revenue",
+  "Service Provider", 
+  "Customers"
 ];
-const regionOptions = ["All Regions", ...new Set(data.map((d) => d.region))];
-const metricOptions = ["Subscription Revenue", "Service Provider", "Customers"];
 
 const maxValues = {
   "Subscription Revenue": Math.max(...data.map((d) => d["Subscription Revenue"])),
@@ -247,10 +213,7 @@ export default function MonthlyStatsChart() {
   const [toMonth, setToMonth] = useState(
     monthYearOptions[monthYearOptions.length - 1]
   );
-  const [selectedCategory, setSelectedCategory] = useState("All Categories");
-  const [selectedRegion, setSelectedRegion] = useState("All Regions");
-  const [selectedMetric, setSelectedMetric] = useState("all");
-  const [chartType, setChartType] = useState("Bar");
+  const [selectedCategory, setSelectedCategory] = useState("All");
 
   const filteredData = useMemo(() => {
     return data.filter((d) => {
@@ -259,216 +222,268 @@ export default function MonthlyStatsChart() {
       const toIndex = monthYearOptions.indexOf(toMonth);
       return (
         monthIndex >= fromIndex &&
-        monthIndex <= toIndex &&
-        (selectedCategory === "All Categories" ||
-          d.category === selectedCategory) &&
-        (selectedRegion === "All Regions" || d.region === selectedRegion)
+        monthIndex <= toIndex
       );
     });
-  }, [fromMonth, toMonth, selectedCategory, selectedRegion]);
+  }, [fromMonth, toMonth]);
 
-  const columns = [
-    {
-      title: "SL",
-      dataIndex: "sl",
-      key: "sl",
-      align: "center",
-      render: (_, __, index) => index + 1,
-    },
-    { title: "Date", dataIndex: "date", key: "date", align: "center" },
-    { 
-      title: "Subscription Revenue", 
-      dataIndex: "Subscription Revenue", 
-      key: "Subscription Revenue", 
-      align: "center" 
-    },
-    { 
-      title: "Service Provider", 
-      dataIndex: "Service Provider", 
-      key: "Service Provider", 
-      align: "center" 
-    },
-    {
-      title: "Customers",
-      dataIndex: "Customers",
-      key: "Customers",
-      align: "center",
-    },
-  ];
+  const getTableColumns = () => {
+    const baseColumns = [
+      {
+        title: "SL",
+        dataIndex: "sl",
+        key: "sl",
+        width: 60,
+        render: (_, __, index) => index + 1,
+      },
+      { 
+        title: "Date", 
+        dataIndex: "date", 
+        key: "date",
+        width: 120,
+      },
+    ];
+
+    if (selectedCategory === "All") {
+      return [
+        ...baseColumns,
+        {
+          title: "Subscription Revenue",
+          dataIndex: "Subscription Revenue",
+          key: "Subscription Revenue",
+          width: 150,
+        },
+        {
+          title: "Service Provider",
+          dataIndex: "Service Provider",
+          key: "Service Provider",
+          width: 150,
+        },
+        {
+          title: "Customers",
+          dataIndex: "Customers",
+          key: "Customers",
+          width: 120,
+        }
+      ];
+    } else {
+      return [
+        ...baseColumns,
+        {
+          title: selectedCategory,
+          dataIndex: selectedCategory,
+          key: selectedCategory,
+          width: 150,
+        }
+      ];
+    }
+  };
 
   return (
-    <div style={{ width: "100%", padding: "1rem" }}>
-      {/* From -> To Month Dropdowns */}
+    <div style={{ width: "100%", padding: "1rem", fontFamily: "Arial, sans-serif" }}>
+      {/* Filter Controls */}
       <div
         style={{
           display: "flex",
           gap: "1rem",
-          marginBottom: "1rem",
+          marginBottom: "2rem",
           flexWrap: "wrap",
+          alignItems: "center",
         }}
       >
-        <Select
-          value={fromMonth}
-          style={{ width: 150 }}
-          onChange={setFromMonth}
-        >
-          {monthYearOptions.map((option) => (
-            <Option key={option} value={option}>
-              {option}
-            </Option>
-          ))}
-        </Select>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+          <label style={{ fontWeight: "bold", minWidth: "80px" }}>From:</label>
+          <select
+            value={fromMonth}
+            onChange={(e) => setFromMonth(e.target.value)}
+            style={{ 
+              padding: "8px 12px", 
+              border: "1px solid #d1d5db", 
+              borderRadius: "4px",
+              minWidth: "120px"
+            }}
+          >
+            {monthYearOptions.map((option) => (
+              <option key={option} value={option}>
+                {option}
+              </option>
+            ))}
+          </select>
+        </div>
 
-        <Select
-          value={selectedCategory}
-          style={{ width: 150 }}
-          onChange={setSelectedCategory}
-        >
-          {categoryOptions.map((option) => (
-            <Option key={option} value={option}>
-              {option}
-            </Option>
-          ))}
-        </Select>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+          <label style={{ fontWeight: "bold", minWidth: "60px" }}>To:</label>
+          <select
+            value={toMonth}
+            onChange={(e) => setToMonth(e.target.value)}
+            style={{ 
+              padding: "8px 12px", 
+              border: "1px solid #d1d5db", 
+              borderRadius: "4px",
+              minWidth: "120px"
+            }}
+          >
+            {monthYearOptions.map((option) => (
+              <option key={option} value={option}>
+                {option}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+          <label style={{ fontWeight: "bold", minWidth: "80px" }}>Category:</label>
+          <select
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
+            style={{ 
+              padding: "8px 12px", 
+              border: "1px solid #d1d5db", 
+              borderRadius: "4px",
+              minWidth: "180px"
+            }}
+          >
+            {categoryOptions.map((option) => (
+              <option key={option} value={option}>
+                {option}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {/* Chart */}
       <div
-        className="p-4 rounded-lg border"
-        style={{ width: "100%", height: 400, marginTop: "40px" }}
+        style={{
+          width: "100%",
+          height: "400px",
+          border: "1px solid #e5e7eb",
+          borderRadius: "8px",
+          padding: "1rem",
+          backgroundColor: "#ffffff",
+          marginBottom: "2rem"
+        }}
       >
-        <ResponsiveContainer>
-          {chartType === "Bar" ? (
-            <BarChart
-              data={filteredData}
-              margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-              barCategoryGap="20%"
-              barGap={13}
-            >
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="date" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              {(selectedMetric === "all" || selectedMetric === "Subscription Revenue") && (
-                <Bar
-                  dataKey="Subscription Revenue"
-                  fill="#7086FD"
-                  shape={(props) => (
-                    <Custom3DBarWithWatermark {...props} dataKey="Subscription Revenue" />
-                  )}
-                />
-              )}
-              {(selectedMetric === "all" || selectedMetric === "Service Provider") && (
-                <Bar
-                  dataKey="Service Provider"
-                  fill="#6FD195"
-                  shape={(props) => (
-                    <Custom3DBarWithWatermark {...props} dataKey="Service Provider" />
-                  )}
-                />
-              )}
-              {(selectedMetric === "all" ||
-                selectedMetric === "Customers") && (
-                <Bar
-                  dataKey="Customers"
-                  fill="#FFAE4C"
-                  shape={(props) => (
-                    <Custom3DBarWithWatermark
-                      {...props}
-                      dataKey="Customers"
-                    />
-                  )}
-                />
-              )}
-            </BarChart>
-          ) : chartType === "Line" ? (
-            <LineChart
-              data={filteredData}
-              margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-            >
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="date" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              {(selectedMetric === "all" || selectedMetric === "Subscription Revenue") && (
-                <Line type="monotone" dataKey="Subscription Revenue" stroke="#7086FD" />
-              )}
-              {(selectedMetric === "all" || selectedMetric === "Service Provider") && (
-                <Line type="monotone" dataKey="Service Provider" stroke="#6FD195" />
-              )}
-              {(selectedMetric === "all" ||
-                selectedMetric === "Customers") && (
-                <Line
-                  type="monotone"
-                  dataKey="Customers"
-                  stroke="#FFAE4C"
-                />
-              )}
-            </LineChart>
-          ) : (
-            <AreaChart
-              data={filteredData}
-              margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-            >
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="date" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              {(selectedMetric === "all" || selectedMetric === "Subscription Revenue") && (
-                <Area
-                  type="monotone"
-                  dataKey="Subscription Revenue"
-                  stroke="#7086FD"
-                  fill="#7086FD"
-                />
-              )}
-              {(selectedMetric === "all" || selectedMetric === "Service Provider") && (
-                <Area
-                  type="monotone"
-                  dataKey="Service Provider"
-                  stroke="#6FD195"
-                  fill="#6FD195"
-                />
-              )}
-              {(selectedMetric === "all" ||
-                selectedMetric === "Customers") && (
-                <Area
-                  type="monotone"
-                  dataKey="Customers"
-                  stroke="#FFAE4C"
-                  fill="#FFAE4C"
-                />
-              )}
-            </AreaChart>
-          )}
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart
+            data={filteredData}
+            margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+            barCategoryGap="20%"
+            barGap={13}
+          >
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="date" />
+            <YAxis />
+            <Tooltip />
+            <Legend />
+            {(selectedCategory === "All" || selectedCategory === "Subscription Revenue") && (
+              <Bar
+                dataKey="Subscription Revenue"
+                fill="#7086FD"
+                shape={(props) => (
+                  <Custom3DBarWithWatermark {...props} dataKey="Subscription Revenue" />
+                )}
+              />
+            )}
+            {(selectedCategory === "All" || selectedCategory === "Service Provider") && (
+              <Bar
+                dataKey="Service Provider"
+                fill="#6FD195"
+                shape={(props) => (
+                  <Custom3DBarWithWatermark {...props} dataKey="Service Provider" />
+                )}
+              />
+            )}
+            {(selectedCategory === "All" || selectedCategory === "Customers") && (
+              <Bar
+                dataKey="Customers"
+                fill="#FFAE4C"
+                shape={(props) => (
+                  <Custom3DBarWithWatermark {...props} dataKey="Customers" />
+                )}
+              />
+            )}
+          </BarChart>
         </ResponsiveContainer>
       </div>
 
-      {/* Ant Design Table */}
-      <div style={{ marginTop: "50px" }}>
-        <h1 className="text-[22px] font-bold mb-2">Data Table</h1>
-        <Table
-          bordered={false}
-          size="small"
-          rowClassName="custom-row"
-          components={components}
-          className="custom-table"
-          columns={columns.filter(
-            (col) =>
-              selectedMetric === "all" || 
-              col.dataIndex === selectedMetric ||
-              col.dataIndex === "date" ||
-              col.dataIndex === "sl"
-          )}
-          dataSource={filteredData.map((row, index) => ({
-            ...row,
-            key: index,
-          }))}
-          pagination={{ pageSize: 6 }}
-        />
+      {/* Data Table */}
+      <div>
+        <h2 style={{ fontSize: "22px", fontWeight: "bold", marginBottom: "1rem" }}>
+          Data Table
+        </h2>
+        <div style={{ 
+          overflowX: "auto", 
+          border: "1px solid #e5e7eb", 
+          borderRadius: "8px",
+          backgroundColor: "#ffffff"
+        }}>
+          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+            <thead>
+              <tr style={{ backgroundColor: "#f9fafb" }}>
+                {getTableColumns().map((col) => (
+                  <th
+                    key={col.key}
+                    style={{
+                      padding: "12px",
+                      textAlign: "center",
+                      fontWeight: "bold",
+                      borderBottom: "2px solid #e5e7eb",
+                      fontSize: "14px",
+                      color: "#374151"
+                    }}
+                  >
+                    {col.title}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {filteredData.map((row, index) => (
+                <tr 
+                  key={index}
+                  style={{
+                    backgroundColor: index % 2 === 0 ? "#ffffff" : "#f9fafb"
+                  }}
+                >
+                  <td style={{ padding: "10px", textAlign: "center", borderBottom: "1px solid #e5e7eb" }}>
+                    {index + 1}
+                  </td>
+                  <td style={{ padding: "10px", textAlign: "center", borderBottom: "1px solid #e5e7eb" }}>
+                    {row.date}
+                  </td>
+                  {selectedCategory === "All" ? (
+                    <>
+                      <td style={{ padding: "10px", textAlign: "center", borderBottom: "1px solid #e5e7eb" }}>
+                        {row["Subscription Revenue"]}
+                      </td>
+                      <td style={{ padding: "10px", textAlign: "center", borderBottom: "1px solid #e5e7eb" }}>
+                        {row["Service Provider"]}
+                      </td>
+                      <td style={{ padding: "10px", textAlign: "center", borderBottom: "1px solid #e5e7eb" }}>
+                        {row["Customers"]}
+                      </td>
+                    </>
+                  ) : (
+                    <td style={{ padding: "10px", textAlign: "center", borderBottom: "1px solid #e5e7eb" }}>
+                      {row[selectedCategory]}
+                    </td>
+                  )}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        {filteredData.length === 0 && (
+          <div style={{ 
+            textAlign: "center", 
+            padding: "2rem", 
+            color: "#6b7280",
+            fontSize: "16px"
+          }}>
+            No data found for the selected filters
+          </div>
+        )}
       </div>
     </div>
   );

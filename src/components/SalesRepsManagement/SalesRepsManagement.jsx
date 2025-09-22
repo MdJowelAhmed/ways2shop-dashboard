@@ -394,8 +394,6 @@ const ServiceCategorySection = () => {
         <Switch
           checked={status === "Active"}
           onChange={() => toggleStatus(record.id)}
-          // checkedChildren="Active"
-          // unCheckedChildren="Inactive"
         />
       ),
     },
@@ -442,7 +440,7 @@ const ServiceCategorySection = () => {
   ];
 
   return (
-    <div >
+    <div style={{ padding: 24, backgroundColor: "#f0f2f5", minHeight: "100vh" }}>
       
 
       {/* Main Content */}
@@ -496,7 +494,27 @@ const ServiceCategorySection = () => {
             </Button>
           </div>
 
-         
+          <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+           
+
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={handleCreateNew}
+              style={{
+               
+                border: "none",
+                borderRadius: 8,
+                fontWeight: 600,
+                height: 40,
+                paddingLeft: 20,
+                paddingRight: 20,
+              }}
+              className="bg-primary"
+            >
+              Create Category
+            </Button>
+          </div>
         </div>
 
         {/* Content */}
@@ -527,7 +545,7 @@ const ServiceCategorySection = () => {
         <Modal
           title={
             <div style={{ textAlign: 'center', paddingBottom: 10 }}>
-              <h3 style={{ margin: 0, color: '#1890ff' }}>
+              <h3 style={{ margin: 0, color: '#CDA861' }}>
                 {editingRecord ? "Edit Category" : "Create New Category"}
               </h3>
             </div>
@@ -542,7 +560,7 @@ const ServiceCategorySection = () => {
           confirmLoading={loading}
           okButtonProps={{
             style: {
-              background: "linear-gradient(45deg, #1890ff, #36cfc9)",
+              background: "linear-gradient(45deg, #CDA861, #CDA861)",
               border: "none",
               borderRadius: 6,
             }
@@ -560,7 +578,7 @@ const ServiceCategorySection = () => {
                 justifyContent: "center",
                 fontSize: 32,
                 margin: "0 auto 16px",
-                border: "3px solid #1890ff",
+                border: "3px solid #CDA861",
                 overflow: "hidden",
                 position: 'relative'
               }}
@@ -578,7 +596,7 @@ const ServiceCategorySection = () => {
             <Upload {...uploadProps}>
               <Button 
                 icon={<UploadOutlined />} 
-                style={{ borderRadius: 20, borderColor: '#1890ff', color: '#1890ff' }}
+                style={{ borderRadius: 20, borderColor: '#CDA861', color: '#CDA861' }}
               >
                 Upload Image
               </Button>
@@ -607,7 +625,7 @@ const ServiceCategorySection = () => {
               />
             </div>
 
-            <div style={{ marginBottom: 16 }}>
+            {/* <div style={{ marginBottom: 16 }}>
               <label
                 style={{
                   display: "block",
@@ -629,7 +647,7 @@ const ServiceCategorySection = () => {
                 maxLength={200}
                 showCount
               />
-            </div>
+            </div> */}
           </div>
         </Modal>
 
@@ -637,7 +655,7 @@ const ServiceCategorySection = () => {
         <Modal
           title={
             <div style={{ textAlign: 'center' }}>
-              <h3 style={{ margin: 0, color: '#1890ff' }}>Category Details</h3>
+              <h3 style={{ margin: 0, color: '#CDA861' }}>Category Details</h3>
             </div>
           }
           open={isDetailsVisible}
@@ -663,7 +681,7 @@ const ServiceCategorySection = () => {
                     height: 100,
                     margin: "0 auto 20px",
                     borderRadius: "50%",
-                    border: "4px solid #1890ff",
+                    border: "4px solid #CDA861",
                     overflow: "hidden",
                     display: "flex",
                     alignItems: "center",
@@ -685,9 +703,7 @@ const ServiceCategorySection = () => {
                 <h2 style={{ color: '#262626', marginBottom: 10 }}>
                   {selectedRecord.categoryName}
                 </h2>
-                <p style={{ color: '#8c8c8c', fontSize: 14 }}>
-                  {selectedRecord.description || 'No description available'}
-                </p>
+             
               </div>
 
               <Row gutter={16}>
@@ -696,7 +712,7 @@ const ServiceCategorySection = () => {
                     <Statistic
                       title="Service Providers"
                       value={selectedRecord.serviceProvider}
-                      valueStyle={{ color: '#1890ff', fontSize: 20 }}
+                      valueStyle={{ color: '#CDA861', fontSize: 20 }}
                     />
                   </Card>
                 </Col>
@@ -705,7 +721,7 @@ const ServiceCategorySection = () => {
                     <Statistic
                       title="Completed Jobs"
                       value={selectedRecord.totalJobComplete}
-                      valueStyle={{ color: '#52c41a', fontSize: 20 }}
+                      valueStyle={{ color: '#CDA861', fontSize: 20 }}
                     />
                   </Card>
                 </Col>

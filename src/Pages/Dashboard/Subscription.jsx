@@ -62,39 +62,7 @@ const PackagesPlans = () => {
       ],
       popular: false,
       active: true,
-    },
-    {
-      id: 4,
-      title: "Platinum Plan",
-      description: "Billed annually.",
-      price: 60,
-      duration: "1 year",
-      features: [
-        "Unlimited Users",
-        "Premium Analytics",
-        "Dedicated Support",
-        "1TB Storage",
-        "Full Integration",
-      ],
-      popular: false,
-      active: true,
-    },
-    {
-      id: 5,
-      title: "Enterprise Plan",
-      description: "Billed annually.",
-      price: 100,
-      duration: "1 year",
-      features: [
-        "All Users",
-        "Custom Analytics",
-        "Priority Support",
-        "Unlimited Storage",
-        "Custom Integrations",
-      ],
-      popular: true,
-      active: true,
-    },
+    }
   ];
 
   const [packages, setPackages] = useState([]);
@@ -230,21 +198,21 @@ const PackagesPlans = () => {
         <p className="bg-primary px-[12px] py-[2px] text-white rounded-3xl mb-2">
           Pricing Plan
         </p>
-        <h2 className="text-[28px] font-semibold text-secondary">
+        <h2 className="text-[28px] font-semibold text-primary">
           Plans for all sizes
         </h2>
         <p className="text-[15px] font-normal mb-[10px]">
           Simple, transparent pricing that grows with you. Try any plan free for
           30 days.
         </p>
-        <GradientButton
+        <Button
           type="primary"
           icon={<PlusOutlined />}
           className=" text-white px-5 h-auto rounded-lg shadow-lg hover:bg-[#012F60] transition-all flex items-center"
           onClick={() => showModal()}
         >
           Add Package
-        </GradientButton>
+        </Button>
       </div>
       <div className="flex justify-center">
         <div className="w-3/4 mb-6">

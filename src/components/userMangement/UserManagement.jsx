@@ -39,7 +39,7 @@ const UserManagement = () => {
       location: "Dhaka, Bangladesh",
       phoneNumber: "01712-345678",
       joiningDate: "15-01-2024",
-      service: "Premium",
+      service: "No",
       status: "Active",
     },
     {
@@ -50,7 +50,7 @@ const UserManagement = () => {
       location: "Chittagong, BD",
       phoneNumber: "01855-987654",
       joiningDate: "22-12-2023",
-      service: "Basic",
+      service: "Yes",
       status: "Inactive",
     },
     {
@@ -61,7 +61,7 @@ const UserManagement = () => {
       location: "Sylhet, Bangladesh",
       phoneNumber: "01923-456789",
       joiningDate: "08-03-2024",
-      service: "Standard",
+      service: "Yes",
       status: "Active",
     },
     {
@@ -72,8 +72,8 @@ const UserManagement = () => {
       location: "Rajshahi, BD",
       phoneNumber: "01734-567890",
       joiningDate: "30-11-2023",
-      service: "Premium",
-      status: "Pending",
+      service: "No",
+      status: "Inactive",
     },
     {
       key: 5,
@@ -83,7 +83,7 @@ const UserManagement = () => {
       location: "Khulna, Bangladesh",
       phoneNumber: "01656-789012",
       joiningDate: "14-02-2024",
-      service: "Basic",
+      service: "Yes",
       status: "Active",
     },
   ];
@@ -132,7 +132,7 @@ const UserManagement = () => {
       phoneNumber: "01766-543210",
       joiningDate: "05-04-2023",
       service: "Legal",
-      status: "Pending",
+      status: "Inactive",
     },
     {
       key: 5,
@@ -198,11 +198,6 @@ const UserManagement = () => {
           key: "Inactive",
           label: "Inactive",
           onClick: () => handleStatusChange(record, "Inactive"),
-        },
-        {
-          key: "Pending",
-          label: "Pending",
-          onClick: () => handleStatusChange(record, "Pending"),
         },
       ]}
     />
@@ -358,8 +353,8 @@ const UserManagement = () => {
                 minWidth: "140px",
                 height: "44px",
                 backgroundColor:
-                  activeTab === "customer" ? "#1890ff" : "#f8fafc",
-                borderColor: activeTab === "customer" ? "#1890ff" : "#e2e8f0",
+                  activeTab === "customer" ? "#CDA861" : "#f8fafc",
+                borderColor: activeTab === "customer" ? "#CDA861" : "#e2e8f0",
                 color: activeTab === "customer" ? "white" : "#64748b",
               }}
             >
@@ -377,9 +372,9 @@ const UserManagement = () => {
                 minWidth: "140px",
                 height: "44px",
                 backgroundColor:
-                  activeTab === "serviceProvider" ? "#10b981" : "#f8fafc",
+                  activeTab === "serviceProvider" ? "#CDA861" : "#f8fafc",
                 borderColor:
-                  activeTab === "serviceProvider" ? "#10b981" : "#e2e8f0",
+                  activeTab === "serviceProvider" ? "#CDA861" : "#e2e8f0",
                 color: activeTab === "serviceProvider" ? "white" : "#64748b",
               }}
             >
@@ -489,31 +484,32 @@ const UserManagement = () => {
         .ant-pagination-item-active {
           background: linear-gradient(
             135deg,
-            #667eea 0%,
+            ##CDA861 0%,
             #764ba2 100%
           ) !important;
-          border-color: #667eea !important;
+          border-color: ##CDA861 !important;
+          color: black !important;
         }
 
         .ant-pagination-item-active a {
-          color: white !important;
+          color: black !important;
         }
 
         .ant-select:not(.ant-select-disabled):hover .ant-select-selector {
-          border-color: #667eea !important;
+          border-color: ##CDA861 !important;
         }
 
         .ant-select-focused .ant-select-selector {
-          border-color: #667eea !important;
+          border-color: ##CDA861 !important;
           box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2) !important;
         }
 
         .ant-input:hover {
-          border-color: #667eea !important;
+          border-color: ##CDA861 !important;
         }
 
         .ant-input:focus {
-          border-color: #667eea !important;
+          border-color: ##CDA861 !important;
           box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2) !important;
         }
 
