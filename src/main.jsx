@@ -34,8 +34,8 @@ ReactDOM.createRoot(document.getElementById("root")).render(
     <ConfigProvider
       theme={{
         token: {
-          colorPrimary: "#3fae6a",
-          colorBorder: "#3fae6a", // Default border color
+          colorPrimary: "#CDA861",
+          colorBorder: "#CDA861", // Default border color
           // colorText: "rgba(0, 0, 0, 0.88)", // Default text color
           // colorTextPlaceholder: "#bfbfbf", // Placeholder color
           // colorBgContainer: "#ffffff", // Background color
@@ -43,13 +43,13 @@ ReactDOM.createRoot(document.getElementById("root")).render(
         },
         components: {
           Input: {
-            activeBorderColor: "#3fae6a", // Active border color
-            hoverBorderColor: "#3fae6a", // Hover border color
+            activeBorderColor: "#CDA861", // Active border color
+            hoverBorderColor: "#CDA861", // Hover border color
             activeShadow: "0 0 0 2px rgba(232, 80, 91, 0.1)", // Focus shadow
           },
         },
         Button: {
-          colorPrimary: "#3fae6a",
+          colorPrimary: "#CDA861",
         },
       }}
     >

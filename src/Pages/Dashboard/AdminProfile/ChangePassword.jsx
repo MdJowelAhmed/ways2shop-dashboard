@@ -143,22 +143,24 @@ const ChangePassword = () => {
               }}
             >
               <Form.Item>
-                <GradientButton
+                <Button
                   type="primary"
                   htmlType="submit"
                   block
                   style={{
                     border: "none",
                     height: "40px",
-                    background: "#1D75F2",
+                    background: "#CDA861",
                     color: "white",
                     borderRadius: "8px",
                     outline: "none",
+                    padding: "10px 20px",
                     width: "150px",
                   }}
+                  className="px-6"
                 >
                   Update your password
-                </GradientButton>
+                </Button>
               </Form.Item>
             </div>
           </Form>

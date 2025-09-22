@@ -131,12 +131,12 @@ const TermsAndCondition = () => {
     <div className="p-4">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-bold">Terms & Conditions</h2>
-        <GradientButton
+        <Button
           onClick={showModal}
-          className="w-60 bg-secondary text-white h-10"
+          className="w-60 bg-[#CDA861] text-white h-10"
         >
           Update Terms & Conditions
-        </GradientButton>
+        </Button>
       </div>
 
       <div className="mt-6">
@@ -162,13 +162,13 @@ const TermsAndCondition = () => {
           >
             Cancel
           </Button>,
-          <GradientButton
+          <Button
             key="submit"
             onClick={handleOk}
-            className="bg-secondary text-white"
+            className="bg-[#CDA861] text-white"
           >
             Update Terms & Conditions
-          </GradientButton>,
+          </Button>,
         ]}
       >
         <Tabs
