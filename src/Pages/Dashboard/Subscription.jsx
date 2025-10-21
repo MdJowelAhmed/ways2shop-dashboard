@@ -194,7 +194,7 @@ const PackagesPlans = () => {
 
   return (
     <div className="pt-1 px-4">
-      <div className="flex flex-col justify-center items-center mb-8">
+      <div className="flex flex-col justify-end w-full items-center mb-8">
         <p className="bg-primary px-[12px] py-[2px] text-white rounded-3xl mb-2">
           Pricing Plan
         </p>
@@ -205,14 +205,14 @@ const PackagesPlans = () => {
           Simple, transparent pricing that grows with you. Try any plan free for
           30 days.
         </p>
-        <Button
+        {/* <Button
           type="primary"
           icon={<PlusOutlined />}
-          className=" text-white px-5 h-auto rounded-lg shadow-lg hover:bg-[#012F60] transition-all flex items-center"
+          className=" text-white px-5  rounded-lg h-12 shadow-lg hover:bg-[#012F60] transition-all flex items-center"
           onClick={() => showModal()}
         >
           Add Package
-        </Button>
+        </Button> */}
       </div>
       <div className="flex justify-center">
         <div className="w-3/4 mb-6">
@@ -279,7 +279,7 @@ const PackagesPlans = () => {
                     </div>
 
                     <Button
-                      className={`w-full mt-12 border ${
+                      className={`w-full mt-12 h-12 border ${
                         pkg.active
                           ? "border-primary hover:!bg-primary hover:!text-white"
                           : "border-gray-400 text-gray-400 hover:!bg-gray-400 hover:!text-white"

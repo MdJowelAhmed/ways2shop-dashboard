@@ -123,8 +123,8 @@ const UserManagement = () => {
               icon={!hasProfile && <UserOutlined />}
               style={{
                 backgroundColor: hasProfile ? "transparent" : "#1890ff",
-                height: "62px",
-                width: "62px",
+                height: "42px",
+                width: "42px",
               }}
             />
             <span style={{ fontWeight: "500" }}>{text || "N/A"}</span>

@@ -1,15 +1,35 @@
 import { Button, Form, Input } from "antd";
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import keyIcon from "../../assets/key.png";
 import { ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useForgotPasswordMutation } from "../../redux/apiSlices/authSlice";
 
 const ForgotPassword = () => {
   const navigate = useNavigate();
 
+  const [forgotPassword, { isLoading, isError, error }] =
+    useForgotPasswordMutation();
+  const [verificationStatus, setVerificationStatus] = useState("");
+
   const onFinish = async (values) => {
-    navigate(`/auth/verify-otp?email=${values?.email}`);
+    try {
+      const response = await forgotPassword({ email: values.email }).unwrap();
+      console.log(response);
+      if (response.success) {
+        navigate(
+          "/auth/verify-otp?email=" +
+            encodeURIComponent(values.email) +
+            "&type=forgot-password"
+        );
+      } else {
+        setVerificationStatus("Failed to send OTP. Please try again.");
+      }
+    } catch (err) {
+      console.error("Forgot password error:", err);
+      setVerificationStatus("Failed to send OTP. Please try again.");
+    }
   };
 
   return (
@@ -60,7 +80,7 @@ const ForgotPassword = () => {
               borderRadius: "200px",
               marginTop: 20,
             }}
-            className="flex items-center justify-center bg-[#3FAE6A] rounded-lg"
+            className="flex items-center justify-center bg-primary rounded-lg"
           >
             Submit
           </button>

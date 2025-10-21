@@ -6,7 +6,7 @@ const authSlice = api.injectEndpoints({
       query: (data) => {
         return {
           method: "POST",
-          url: "/auth/otp-verify",
+          url: "/auth/verify-email",
           body: data,
         };
       },
@@ -36,12 +36,26 @@ const authSlice = api.injectEndpoints({
         };
       },
     }),
+    resendOtp: builder.mutation({
+      query: (data) => {
+        return {
+          method: "POST",
+          url: "/auth/resend-otp",
+          body: data,
+        };
+      },
+    }),
     resetPassword: builder.mutation({
-      query: (value) => {
+      query: (data) => {
+        const resetToken = localStorage.getItem("verifyToken");
         return {
           method: "POST",
           url: "/auth/reset-password",
-          body: value,
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: resetToken || undefined,
+          },
+          body: data,
         };
       },
     }),
@@ -72,12 +86,11 @@ const authSlice = api.injectEndpoints({
           //   )}`,
           // },
         };
-
       },
       invalidatesTags: ["Auth"],
     }),
 
-      profile: builder.query({
+    profile: builder.query({
       query: () => ({
         method: "GET",
         url: "/user/profile",
@@ -91,6 +104,7 @@ export const {
   useOtpVerifyMutation,
   useLoginMutation,
   useForgotPasswordMutation,
+  useResendOtpMutation,
   useResetPasswordMutation,
   useChangePasswordMutation,
   useUpdateProfileMutation,

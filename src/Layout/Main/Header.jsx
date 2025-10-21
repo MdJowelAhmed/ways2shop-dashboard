@@ -4,9 +4,11 @@ import { FaRegBell } from "react-icons/fa6";
 import { Badge, Button, Dropdown, Menu, Modal } from "antd";
 import { IoIosLogOut } from "react-icons/io";
 import Avatar from "../../assets/avatar.png";
+import { useGetAllUsersQuery } from "../../redux/apiSlices/userSlice";
 
 const Header = ({ toggleSidebar, isMobile }) => {
   const [isLogoutModalOpen, setIsLogoutModalOpen] = React.useState(false);
+  const {data:userData} = useGetAllUsersQuery();
 
   const showLogoutConfirm = () => {
     setIsLogoutModalOpen(true); 

@@ -1,27 +1,66 @@
-import { Button, ConfigProvider, Form, Input } from "antd";
-import React from "react";
-import { useNavigate } from "react-router-dom";
-import keyIcon from "../../assets/key.png"
+import { Button, ConfigProvider, Form, Input, message } from "antd";
+import React, { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import keyIcon from "../../assets/key.png";
 import { ArrowLeft } from "lucide-react";
+import { useResetPasswordMutation } from "../../redux/apiSlices/authSlice";
 
 const SetPassword = () => {
-
-  const email = new URLSearchParams(location.search).get("email")
   const navigate = useNavigate();
+  const location = useLocation();
+  const [form] = Form.useForm();
+  const [loading, setLoading] = useState(false);
 
-  const onFinish = async(values) => {
-        navigate(`/auth/login`);
+  const searchParams = new URLSearchParams(location.search);
+  const email = searchParams.get("email");
+  const [resetPassword, { isLoading }] = useResetPasswordMutation();
+
+  useEffect(() => {
+    if (!email) {
+      message.error("Email is required for password reset");
+      navigate("/auth/login");
+    }
+  }, [email, navigate]);
+
+  const onFinish = async (values) => {
+    console.log(values);
+    setLoading(true);
+    try {
+      const response = await resetPassword({
+        email,
+        newPassword: values.newPassword, // ✅ Fixed
+        confirmPassword: values.confirmPassword,
+      }).unwrap();
+
+      console.log("response", response);
+
+      if (response.success) {
+        message.success("Password has been reset successfully!");
+        navigate("/auth/login");
+        localStorage.removeItem("verifyToken"); // Also fixed the quotes here
+      } else {
+        message.error(
+          response.message || "Failed to reset password. Please try again."
+        );
+      }
+    } catch (err) {
+      message.error(
+        err?.data?.message || "Failed to reset password. Please try again."
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div>
-      <img src={keyIcon} alt="KeyIcon" className="mb-[24px] mx-auto"/>
-        <div className="text-center mb-8">
-          <h1 className="text-[25px] font-semibold mb-6">Set new password</h1>
-          <p className="w-[90%] mx-auto text-base">
-            Your new password must be different to previously used passwords.
-          </p>
-        </div>
+      <img src={keyIcon} alt="KeyIcon" className="mb-[24px] mx-auto" />
+      <div className="text-center mb-8">
+        <h1 className="text-[25px] font-semibold mb-6">Set new password</h1>
+        <p className="w-[90%] mx-auto text-base">
+          Your new password must be different to previously used passwords.
+        </p>
+      </div>
 
       <Form layout="vertical" onFinish={onFinish}>
         <Form.Item
@@ -128,7 +167,10 @@ const SetPassword = () => {
         </Form.Item>
       </Form>
       <div className="">
-        <a href="/auth/login" className="flex items-center justify-center gap-1 text-[#667085] hover:text-[#3FAE6A] text-center mt-4">
+        <a
+          href="/auth/login"
+          className="flex items-center justify-center gap-1 text-[#667085] hover:text-[#3FAE6A] text-center mt-4"
+        >
           <ArrowLeft size={20} />
           <p>Back to log in</p>
         </a>

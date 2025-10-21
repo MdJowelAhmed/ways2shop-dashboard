@@ -1,35 +1,102 @@
-import { Button, Form, Typography, Input } from "antd";
+import { Button, Form, Typography } from "antd";
 import React, { useState } from "react";
 import OTPInput from "react-otp-input";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import image4 from "../../assets/image4.png";
+import { useOtpVerifyMutation, useResendOtpMutation } from "../../redux/apiSlices/authSlice";
+
 const { Text } = Typography;
-import mailIcon from "../../assets/mail.png";
-import { ArrowLeft } from "lucide-react";
 
 const VerifyOtp = () => {
   const navigate = useNavigate();
-  const [otp, setOtp] = useState();
-  const email = new URLSearchParams(location.search).get("email");
+  const [otp, setOtp] = useState("");
+  const email = new URLSearchParams(window.location.search).get("email");
+  const [otpVerify] = useOtpVerifyMutation();
+  const [resendOtp] = useResendOtpMutation();
 
-  const onFinish = async (values) => {
-    navigate(`/auth/set-password?email=${email}`);
+  const [verificationStatus, setVerificationStatus] = useState("");
+
+  const onFinish = async () => {
+    try {
+      const payload = { email, oneTimeCode: Number(otp) };
+      const response = await otpVerify(payload).unwrap();
+
+      if (response.success) {
+        localStorage.setItem("verifyToken", response.data);
+        navigate(`/auth/reset-password?email=${encodeURIComponent(email)}`);
+      } else {
+        setVerificationStatus("Invalid OTP. Please try again.");
+      }
+    } catch (error) {
+      console.error("OTP verification failed:", error);
+      setVerificationStatus("OTP verification failed. Please try again.");
+    }
   };
 
-  const handleResendEmail = async () => {};
+  const handleResendEmail = async () => {
+    try {
+      // Call resend OTP API here
+      await resendOtp({ email }).unwrap();
+      setVerificationStatus(
+        "A new verification code has been sent to your email."
+      );
+    } catch (error) {
+      setVerificationStatus(
+        "Failed to resend verification code. Please try again."
+      );
+    }
+  };
 
   return (
     <div>
-      <img src={mailIcon} alt="KeyIcon" className="mb-[24px] mx-auto" />
       <div className="text-center mb-8">
-        <h1 className="text-[25px] font-semibold mb-6">Check your email</h1>
-        <p className="mx-auto text-base text-[#667085]">
-          We sent a password reset link to olivia@untitledui.com
+        {/* <img src={image4} alt="logo" className="h-40 w-60 mx-auto" /> */}
+        <h1 className="text-[25px] font-semibold mb-6">Verify OTP</h1>
+        <p className="w-[80%] mx-auto">
+          We'll send a verification code to your email. Check your inbox and
+          enter the code here.
         </p>
       </div>
 
       <Form layout="vertical" onFinish={onFinish}>
-        <Form.Item>
-          <button
+        <div className="flex items-center justify-center mb-6">
+          <OTPInput
+            value={otp}
+            onChange={setOtp}
+            numInputs={6} // 🔹 changed from 4 to 6
+            inputStyle={{
+              height: 50,
+              width: 50,
+              borderRadius: "8px",
+              margin: "10px",
+              fontSize: "20px",
+              border: "1px solid #007BA5",
+              color: "#2B2A2A",
+              outline: "none",
+            }}
+            renderInput={(props) => <input {...props} />}
+          />
+        </div>
+
+        {verificationStatus && (
+          <div className="text-center mb-4 text-red-500">
+            {verificationStatus}
+          </div>
+        )}
+
+        <div className="flex items-center justify-between mb-6">
+          <Text>Don't receive the code?</Text>
+          <p
+            onClick={handleResendEmail}
+            className="login-form-forgot"
+            style={{ color: "#007BA5", cursor: "pointer" }}
+          >
+            Resend
+          </p>
+        </div>
+
+        <Form.Item style={{ marginBottom: 0 }}>
+          <Button
             htmlType="submit"
             type="submit"
             style={{
@@ -38,35 +105,14 @@ const VerifyOtp = () => {
               color: "white",
               fontWeight: "400px",
               fontSize: "18px",
-              borderRadius: "200px",
               marginTop: 20,
             }}
-            className="flex items-center justify-center bg-[#3FAE6A] rounded-lg"
+            className="flex items-center justify-center border bg-primary rounded-lg"
           >
-            Open email app
-          </button>
+            Verify OTP
+          </Button>
         </Form.Item>
       </Form>
-      <div className="mt-[20px]">
-        <p className="text-center text-[#667085]">
-          Didn’t receive the email?{" "}
-          <a
-            href="/auth/login"
-            className="text-[#3FAE6A] hover:text-[#1E1E1E] font-semibold"
-          >
-            Click to resend
-          </a>
-        </p>
-      </div>
-      <div className="">
-        <a
-          href="/auth/login"
-          className="flex items-center justify-center gap-1 text-[#667085] hover:text-[#3FAE6A] text-center mt-4"
-        >
-          <ArrowLeft size={20} />
-          <p>Back to log in</p>
-        </a>
-      </div>
     </div>
   );
 };
