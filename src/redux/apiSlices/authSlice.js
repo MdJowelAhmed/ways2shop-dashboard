@@ -51,11 +51,11 @@ const authSlice = api.injectEndpoints({
           method: "POST",
           url: "/auth/change-password",
           body: data,
-          headers: {
-            Authorization: `Bearer ${JSON.parse(
-              localStorage.getItem("token")
-            )}`,
-          },
+          // headers: {
+          //   Authorization: `Bearer ${JSON.parse(
+          //     localStorage.getItem("token")
+          //   )}`,
+          // },
         };
       },
     }),
