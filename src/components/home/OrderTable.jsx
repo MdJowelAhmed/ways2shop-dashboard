@@ -1,32 +1,12 @@
 import React from "react";
 import { Table } from "antd";
-
-const dataSource = [
-  {
-    key: "1",
-    orderId: "#123456",
-    role: "Super Admin: Updated point system rules.",
-    date: "2024-10-26 10:00:00",
-  },
-  {
-    key: "2",
-    orderId: "#123456",
-    role: "Super Admin: Updated point system rules.",
-    date: "2024-10-26 10:00:00",
-  },
-  {
-    key: "3",
-    orderId: "#123456",
-    role: "Super Admin: Updated point system rules.",
-    date: "2024-10-26 10:00:00",
-  },
-];
+import moment from "moment";
+import { useRecentActivitiesQuery } from "../../redux/apiSlices/homeSlice";
 
 const getColumns = () => [
   {
-    dataIndex: "role",
-    key: "role",
-    align: "center",
+    dataIndex: "message",
+    key: "message",
     render: (text) => (
       <div
         style={{
@@ -40,11 +20,12 @@ const getColumns = () => [
     ),
   },
   {
-    dataIndex: "date",
-    key: "date",
+    dataIndex: "createdAt",
+    key: "createdAt",
     render: (text) => (
       <div style={{ width: "100%", textAlign: "right", padding: 8 }}>
-        {text}
+        {/* 🔹 moment দিয়ে তারিখ ফরম্যাট */}
+        {moment(text).format("LLL")}
       </div>
     ),
   },
@@ -52,6 +33,13 @@ const getColumns = () => [
 
 const OrderTable = () => {
   const columns = getColumns();
+  const { data: recentActivities, isLoading } = useRecentActivitiesQuery();
+
+  const dataSource = recentActivities?.data?.map((item, index) => ({
+    key: index,
+    message: item.message,
+    createdAt: item.createdAt,
+  }));
 
   return (
     <div className="w-full">
@@ -60,7 +48,8 @@ const OrderTable = () => {
           Recent Activity
         </h1>
       </div>
-      <div className="overflow-x-auto border rounded-lg pr-4 pl-4 pb-6 pt-3 shadow-md">
+
+      <div className="overflow-x-auto border rounded-lg pr-4 pl-4 pb-6 pt-3 ">
         <Table
           dataSource={dataSource}
           columns={columns}
@@ -69,6 +58,7 @@ const OrderTable = () => {
           size="small"
           scroll={{ x: "max-content" }}
           showHeader={false} // hides <thead>
+          loading={isLoading}
           rowKey="key"
           className="responsive-table"
         />

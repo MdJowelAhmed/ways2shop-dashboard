@@ -440,15 +440,15 @@ const ServiceCategorySection = () => {
   ];
 
   return (
-    <div style={{ padding: 24, backgroundColor: "#f0f2f5", minHeight: "100vh" }}>
+    <div style={{ minHeight:  "100vh", padding: 12,  }}>
       
 
       {/* Main Content */}
       <Card 
         style={{ 
           borderRadius: 12, 
-          boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
-          border: 'none'
+          // boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+          border: '1px solid #e9ecef'
         }}
       >
         {/* Header */}
@@ -468,13 +468,13 @@ const ServiceCategorySection = () => {
               prefix={<SearchOutlined />}
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
-              style={{ width: 250 }}
+              style={{ width: 250, height: 45 }}
             />
             
             <Select
               value={statusFilter}
               onChange={setStatusFilter}
-              style={{ width: 120 }}
+              style={{ width: 120, height: 45 }}
               suffixIcon={<FilterOutlined />}
             >
               <Select.Option value="all">All Status</Select.Option>
@@ -489,6 +489,7 @@ const ServiceCategorySection = () => {
                 setStatusFilter('all');
                 message.success('Filters cleared');
               }}
+              style={{ height: 45, width: 120 }}
             >
               Reset
             </Button>

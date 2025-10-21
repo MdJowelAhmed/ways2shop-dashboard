@@ -50,6 +50,7 @@ import ReportingAnalytics from "../components/reportingAnalytics/ReportingAnalyt
 import PushNotifications from "../components/pushNotifications/PushNotifications";
 // import SalesRepsManagementTable from "../components/SalesRepsManagement/SalesRepsManagement";
 import { Navigate } from "react-router-dom";
+import ServiceCategorySection from "../components/serviceCategory/ServiceCategorySection";
 
 const router = createBrowserRouter([
   {
@@ -67,7 +68,7 @@ const router = createBrowserRouter([
       },
       {
         path: "/category-management",
-        element: <SaleRepsManagement />,
+        element: <ServiceCategorySection />,
       },
       {
         path: "/customerManagement",

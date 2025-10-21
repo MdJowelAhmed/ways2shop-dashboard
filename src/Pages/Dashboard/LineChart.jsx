@@ -11,7 +11,7 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
-// import { useGetRevenueQuery } from "../../redux/apiSlices/homeSlice";
+import { useGetRevenueQuery } from "../../redux/apiSlices/homeSlice";
 
 // Registering chart.js components
 ChartJS.register(
@@ -23,44 +23,22 @@ ChartJS.register(
   Tooltip
 );
 
-// Sample data matching your chart
-const revenueData = [
-  { month: "Jan", revenue: 120000, label: "Jan" },
-  { month: "Feb", revenue: 160000, label: "Feb" },
-  { month: "Mar", revenue: 170000, label: "Mar" },
-  { month: "Apr", revenue: 160000, label: "Apr" },
-  { month: "May", revenue: 200000, label: "May" },
-  {
-    month: "Jun",
-    revenue: 387530,
-    label: "Jun",
-    isHighlight: true,
-    value: "$387,530.00",
-  },
-  { month: "Jul", revenue: 300000, label: "Jul" },
-  { month: "Aug", revenue: 200000, label: "Aug" },
-  { month: "Sep", revenue: 180000, label: "Sep" },
-  {
-    month: "Oct",
-    revenue: 192670,
-    label: "Oct",
-    isHighlight: true,
-    value: "$192,670.00",
-  },
-  { month: "Nov", revenue: 230000, label: "Nov" },
-  { month: "Dec", revenue: 240000, label: "Dec" },
-];
 const LineChart = () => {
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 5 }, (_, i) => currentYear - i);
   const [yearFilter, setYearFilter] = useState(currentYear);
+  const { data: revenueData } = useGetRevenueQuery({ yearFilter });
+  // console.log(revenueData);
+  const months = revenueData?.monthlyRevenue?.map((item) => item.label);
+  const totalRevenue = revenueData?.monthlyRevenue?.map((item) => item.revenue);
 
+  // Data for the line chart
   const data = {
-    labels: revenueData.map((item) => item.month),
+    labels: months,
     datasets: [
       {
         label: "Total Revenue",
-        data: revenueData.map((item) => item.revenue),
+        data: totalRevenue,
         fill: false,
         borderColor: "#CDA861",
         backgroundColor: "transparent",
@@ -85,12 +63,12 @@ const LineChart = () => {
       legend: {
         display: false,
         labels: {
-          color: "#ooo",
+          color: "#000",
         },
       },
       tooltip: {
-        titleColor: "#fff",
-        bodyColor: "#fff",
+        titleColor: "#000",
+        bodyColor: "#000",
         borderColor: "#CDA861",
         borderWidth: 2,
         backgroundColor: "#CDA861",
@@ -121,7 +99,7 @@ const LineChart = () => {
         grid: {
           display: false,
         },
-        beginAtZero: false,
+        beginAtZero: true,
         ticks: {
           color: "#000",
           padding: 32,
@@ -136,9 +114,9 @@ const LineChart = () => {
   return (
     <div style={{ width: "100%", height: "250px" }} className="text-white">
       <div className="flex items-center justify-between">
-        <h2 className="mb-4 text-xl font-bold text-black">Total Revenue</h2>
-        {/* <select
-          className="px-4 py-2 text-white bg-transparent border-2 rounded-lg outline-"
+        <h2 className="mb-4 text-xl font-bold text-white">Total Revenue</h2>
+        <select
+          className="px-4 py-2 text-white bg-[#CDA861] border-2 rounded-lg outline-none"
           value={yearFilter}
           onChange={(e) => setYearFilter(e.target.value)}
         >
@@ -147,7 +125,7 @@ const LineChart = () => {
               {year}
             </option>
           ))}
-        </select> */}
+        </select>
       </div>
 
       <Line data={data} options={options} />

@@ -9,195 +9,90 @@ import {
   Dropdown,
   Tag,
   Card,
-  Row,
-  Col,
   Menu,
+  message,
+  Spin,
 } from "antd";
 import {
   SearchOutlined,
-  FilterOutlined,
   DownOutlined,
   UserOutlined,
-  BellOutlined,
   ToolOutlined,
 } from "@ant-design/icons";
+import {
+  useGetAllUsersQuery,
+  useUpdateUserStatusMutation,
+} from "../../redux/apiSlices/userSlice";
+import { getImageUrl } from "../common/imageUrl";
+// import {
+//   useGetAllUsersQuery,
+//   useUpdateUserStatusMutation,
+// } from "../redux/features/admin/userManagementApi";
 
 const { Option } = Select;
 
 const UserManagement = () => {
   const [searchText, setSearchText] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
-  const [activeTab, setActiveTab] = useState("customer");
+  const [activeTab, setActiveTab] = useState("CUSTOMER");
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
 
-  // Customer data
-  const customerData = [
-    {
-      key: 1,
-      sl: 1,
-      userName: "Ahmed Hassan",
-      email: "ahmed@example.com",
-      location: "Dhaka, Bangladesh",
-      phoneNumber: "01712-345678",
-      joiningDate: "15-01-2024",
-      service: "No",
-      status: "Active",
-    },
-    {
-      key: 2,
-      sl: 2,
-      userName: "Sarah Khan",
-      email: "sarah.khan@email.com",
-      location: "Chittagong, BD",
-      phoneNumber: "01855-987654",
-      joiningDate: "22-12-2023",
-      service: "Yes",
-      status: "Inactive",
-    },
-    {
-      key: 3,
-      sl: 3,
-      userName: "Rahul Ahmed",
-      email: "rahul.a@company.com",
-      location: "Sylhet, Bangladesh",
-      phoneNumber: "01923-456789",
-      joiningDate: "08-03-2024",
-      service: "Yes",
-      status: "Active",
-    },
-    {
-      key: 4,
-      sl: 4,
-      userName: "Maria Islam",
-      email: "maria.islam@gmail.com",
-      location: "Rajshahi, BD",
-      phoneNumber: "01734-567890",
-      joiningDate: "30-11-2023",
-      service: "No",
-      status: "Inactive",
-    },
-    {
-      key: 5,
-      sl: 5,
-      userName: "Karim Uddin",
-      email: "karim.u@outlook.com",
-      location: "Khulna, Bangladesh",
-      phoneNumber: "01656-789012",
-      joiningDate: "14-02-2024",
-      service: "Yes",
-      status: "Active",
-    },
-  ];
+  // Build query arguments
+  const queryArgs = useMemo(() => {
+    const args = [
+      { name: "role", value: activeTab },
+      { name: "page", value: page.toString() },
+      { name: "limit", value: limit.toString() },
+    ];
 
-  // Service Provider data
-  const serviceProviderData = [
-    {
-      key: 1,
-      sl: 1,
-      userName: "Dr. Fazlul Haque",
-      email: "dr.fazlul@medical.com",
-      location: "Dhaka Medical College",
-      phoneNumber: "01711-234567",
-      joiningDate: "10-01-2023",
-      service: "Medical",
-      status: "Active",
-    },
-    {
-      key: 2,
-      sl: 2,
-      userName: "Engineer Nasir",
-      email: "nasir.eng@tech.bd",
-      location: "BUET, Dhaka",
-      phoneNumber: "01812-345678",
-      joiningDate: "25-06-2023",
-      service: "Technical",
-      status: "Active",
-    },
-    {
-      key: 3,
-      sl: 3,
-      userName: "Chef Rahman",
-      email: "chef.rahman@food.com",
-      location: "Gulshan, Dhaka",
-      phoneNumber: "01987-654321",
-      joiningDate: "18-09-2023",
-      service: "Catering",
-      status: "Inactive",
-    },
-    {
-      key: 4,
-      sl: 4,
-      userName: "Lawyer Sultana",
-      email: "adv.sultana@law.bd",
-      location: "Supreme Court, Dhaka",
-      phoneNumber: "01766-543210",
-      joiningDate: "05-04-2023",
-      service: "Legal",
-      status: "Inactive",
-    },
-    {
-      key: 5,
-      sl: 5,
-      userName: "Teacher Hasan",
-      email: "prof.hasan@edu.bd",
-      location: "Dhaka University",
-      phoneNumber: "01623-987654",
-      joiningDate: "12-08-2023",
-      service: "Education",
-      status: "Active",
-    },
-  ];
+    if (searchText) {
+      args.push({ name: "searchTerm", value: searchText });
+    }
 
-  // Get current data based on active tab
-  const currentData =
-    activeTab === "customer" ? customerData : serviceProviderData;
+    if (statusFilter) {
+      args.push({ name: "isActive", value: statusFilter });
+    }
 
-  // Filter data based on search and filters
-  const filteredData = useMemo(() => {
-    return currentData.filter((item) => {
-      const matchesSearch =
-        searchText === "" ||
-        item.userName.toLowerCase().includes(searchText.toLowerCase()) ||
-        item.email.toLowerCase().includes(searchText.toLowerCase()) ||
-        item.location.toLowerCase().includes(searchText.toLowerCase()) ||
-        item.phoneNumber.includes(searchText);
+    return args;
+  }, [activeTab, page, limit, searchText, statusFilter]);
 
-      const matchesStatus = statusFilter === "" || item.status === statusFilter;
-
-      return matchesSearch && matchesStatus;
-    });
-  }, [searchText, statusFilter, currentData]);
+  // Fetch users data
+  const { data, isLoading, isFetching } = useGetAllUsersQuery(queryArgs);
+  console.log("data", data);
+  const [updateUserStatus] = useUpdateUserStatusMutation();
 
   // Handle status change
-  const handleStatusChange = (record, newStatus) => {
-    console.log(`Changing status of ${record.userName} to ${newStatus}`);
-    // Here you would typically update your data source
+  const handleStatusChange = async (record, newStatus) => {
+    console.log("newStatus", newStatus);
+    try {
+      await updateUserStatus({
+        userId: record._id,
+        isActive: newStatus,
+      }).unwrap();
+      message.success(`User status updated to ${newStatus}`);
+    } catch (error) {
+      message.error("Failed to update user status");
+      console.error("Status update error:", error);
+    }
   };
 
   const getStatusColor = (status) => {
-    switch (status) {
-      case "Active":
-        return "#52c41a";
-      case "Inactive":
-        return "#ff4d4f";
-      case "Pending":
-        return "#faad14";
-      default:
-        return "#d9d9d9";
-    }
+    return status === "ACTIVE" ? "#52c41a" : "#ff4d4f";
   };
 
   const statusMenu = (record) => (
     <Menu
       items={[
         {
-          key: "Active",
+          key: "ACTIVE",
           label: "Active",
-          onClick: () => handleStatusChange(record, "Active"),
+          onClick: () => handleStatusChange(record, "ACTIVE"),
         },
         {
-          key: "Inactive",
+          key: "INACTIVE",
           label: "Inactive",
-          onClick: () => handleStatusChange(record, "Inactive"),
+          onClick: () => handleStatusChange(record, "INACTIVE"),
         },
       ]}
     />
@@ -206,27 +101,38 @@ const UserManagement = () => {
   const columns = [
     {
       title: "SL",
-      dataIndex: "sl",
       key: "sl",
       width: 60,
       align: "center",
+      render: (_, __, index) => (page - 1) * limit + index + 1,
     },
     {
       title: "User Name",
-      dataIndex: "userName",
-      key: "userName",
+      dataIndex: "name",
+      key: "name",
       width: 150,
-      render: (text) => (
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <Avatar
-            size="small"
-            icon={<UserOutlined />}
-            style={{ backgroundColor: "#1890ff" }}
-          />
-          <span style={{ fontWeight: "500" }}>{text}</span>
-        </div>
-      ),
+      render: (text, record) => {
+        const hasProfile = record?.profile && record.profile.trim() !== "";
+        const imageSrc = hasProfile ? getImageUrl(record.profile) : undefined;
+
+        return (
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <Avatar
+              // size="small"
+              src={imageSrc}
+              icon={!hasProfile && <UserOutlined />}
+              style={{
+                backgroundColor: hasProfile ? "transparent" : "#1890ff",
+                height: "62px",
+                width: "62px",
+              }}
+            />
+            <span style={{ fontWeight: "500" }}>{text || "N/A"}</span>
+          </div>
+        );
+      },
     },
+
     {
       title: "Email",
       dataIndex: "email",
@@ -238,31 +144,36 @@ const UserManagement = () => {
       dataIndex: "location",
       key: "location",
       width: 180,
+      render: (location) => location?.locationName || "N/A",
     },
     {
       title: "Phone Number",
-      dataIndex: "phoneNumber",
-      key: "phoneNumber",
+      dataIndex: "contact",
+      key: "contact",
       width: 150,
+      render: (contact) => contact || "N/A",
     },
     {
       title: "Joining Date",
-      dataIndex: "joiningDate",
-      key: "joiningDate",
+      dataIndex: "createdAt",
+      key: "createdAt",
       width: 130,
+      render: (date) => new Date(date).toLocaleDateString("en-GB"),
     },
     {
       title: "Service",
-      dataIndex: "service",
-      key: "service",
+      dataIndex: "businessCategory",
+      key: "businessCategory",
       width: 100,
       align: "center",
-      render: (service) => <Tag color="blue">{service}</Tag>,
+      render: (categories) => (
+        <Tag color="blue">{categories?.length > 0 ? "Yes" : "No"}</Tag>
+      ),
     },
     {
       title: "Status",
-      dataIndex: "status",
-      key: "status",
+      dataIndex: "isActive",
+      key: "isActive",
       width: 120,
       render: (status, record) => (
         <Dropdown
@@ -291,6 +202,26 @@ const UserManagement = () => {
     },
   ];
 
+  // Handle search with debounce effect
+  const handleSearch = (value) => {
+    setSearchText(value);
+    setPage(1); // Reset to first page on search
+  };
+
+  // Handle status filter change
+  const handleStatusFilter = (value) => {
+    setStatusFilter(value);
+    setPage(1); // Reset to first page on filter
+  };
+
+  // Handle tab change
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    setPage(1); // Reset to first page on tab change
+    setSearchText(""); // Clear search
+    setStatusFilter(""); // Clear status filter
+  };
+
   return (
     <div
       style={{
@@ -304,8 +235,8 @@ const UserManagement = () => {
         style={{
           borderRadius: "16px",
           marginBottom: "24px",
-          boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
-          border: "none",
+          // boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
+          border: "1px solid #e5e7eb",
         }}
         bodyStyle={{ padding: "20px 32px" }}
       >
@@ -316,27 +247,29 @@ const UserManagement = () => {
               placeholder="Search users..."
               prefix={<SearchOutlined style={{ color: "#9ca3af" }} />}
               value={searchText}
-              onChange={(e) => setSearchText(e.target.value)}
+              onChange={(e) => handleSearch(e.target.value)}
               style={{
                 width: 300,
                 borderRadius: "12px",
                 border: "1px solid #e5e7eb",
                 fontSize: "14px",
+                height: "45px",
               }}
               size="large"
+              allowClear
             />
 
             <Select
               placeholder="Filter by Status"
               value={statusFilter}
-              onChange={setStatusFilter}
-              style={{ width: 150 }}
+              onChange={handleStatusFilter}
+              style={{ width: 150, height: "45px" }}
               size="large"
               allowClear
             >
-              <Option value="Active">Active</Option>
-              <Option value="Inactive">Inactive</Option>
-              <Option value="Pending">Pending</Option>
+              <Option value="">All</Option>
+              <Option value="ACTIVE">Active</Option>
+              <Option value="INACTIVE">Inactive</Option>
             </Select>
           </Space>
 
@@ -344,8 +277,8 @@ const UserManagement = () => {
           <Space size="middle">
             <Button
               size="large"
-              type={activeTab === "customer" ? "primary" : "default"}
-              onClick={() => setActiveTab("customer")}
+              type={activeTab === "CUSTOMER" ? "primary" : "default"}
+              onClick={() => handleTabChange("CUSTOMER")}
               icon={<UserOutlined />}
               style={{
                 borderRadius: "12px",
@@ -353,9 +286,9 @@ const UserManagement = () => {
                 minWidth: "140px",
                 height: "44px",
                 backgroundColor:
-                  activeTab === "customer" ? "#CDA861" : "#f8fafc",
-                borderColor: activeTab === "customer" ? "#CDA861" : "#e2e8f0",
-                color: activeTab === "customer" ? "white" : "#64748b",
+                  activeTab === "CUSTOMER" ? "#CDA861" : "#f8fafc",
+                borderColor: activeTab === "CUSTOMER" ? "#CDA861" : "#e2e8f0",
+                color: activeTab === "CUSTOMER" ? "white" : "#64748b",
               }}
             >
               Customer
@@ -363,8 +296,8 @@ const UserManagement = () => {
 
             <Button
               size="large"
-              type={activeTab === "serviceProvider" ? "primary" : "default"}
-              onClick={() => setActiveTab("serviceProvider")}
+              type={activeTab === "PROVIDER" ? "primary" : "default"}
+              onClick={() => handleTabChange("PROVIDER")}
               icon={<ToolOutlined />}
               style={{
                 borderRadius: "12px",
@@ -372,10 +305,9 @@ const UserManagement = () => {
                 minWidth: "140px",
                 height: "44px",
                 backgroundColor:
-                  activeTab === "serviceProvider" ? "#CDA861" : "#f8fafc",
-                borderColor:
-                  activeTab === "serviceProvider" ? "#CDA861" : "#e2e8f0",
-                color: activeTab === "serviceProvider" ? "white" : "#64748b",
+                  activeTab === "PROVIDER" ? "#CDA861" : "#f8fafc",
+                borderColor: activeTab === "PROVIDER" ? "#CDA861" : "#e2e8f0",
+                color: activeTab === "PROVIDER" ? "white" : "#64748b",
               }}
             >
               Service Provider
@@ -388,8 +320,8 @@ const UserManagement = () => {
       <Card
         style={{
           borderRadius: "16px",
-          boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
-          border: "none",
+          // boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
+          border: "1px solid #e5e7eb",
         }}
         bodyStyle={{ padding: "32px" }}
       >
@@ -402,41 +334,48 @@ const UserManagement = () => {
               fontWeight: "600",
             }}
           >
-            {activeTab === "customer"
+            {activeTab === "CUSTOMER"
               ? "Customer List"
               : "Service Provider List"}
           </h3>
-          <p
+          {/* <p
             style={{ margin: "4px 0 0 0", color: "#6b7280", fontSize: "14px" }}
           >
-            Total {filteredData.length}{" "}
-            {activeTab === "customer" ? "customers" : "service providers"}
-          </p>
+            Total {data?.pagination?.total || 0}{" "}
+            {activeTab === "CUSTOMER" ? "customers" : "service providers"}
+          </p> */}
         </div>
 
-        <Table
-          columns={columns}
-          dataSource={filteredData}
-          pagination={{
-            current: 1,
-            total: filteredData.length,
-            pageSize: 10,
-            showSizeChanger: true,
-            showQuickJumper: true,
-            showTotal: (total, range) =>
-              `${range[0]}-${range[1]} of ${total} items`,
-            style: { marginTop: "24px" },
-            pageSizeOptions: ["10", "25", "50"],
-          }}
-          size="middle"
-          style={{
-            background: "white",
-          }}
-          scroll={{ x: "max-content" }}
-          rowClassName={(record, index) =>
-            index % 2 === 0 ? "user-table-row-even" : "user-table-row-odd"
-          }
-        />
+        <Spin spinning={isLoading || isFetching}>
+          <Table
+            columns={columns}
+            dataSource={data?.data || []}
+            rowKey="_id"
+            pagination={{
+              current: page,
+              total: data?.pagination?.total || 0,
+              pageSize: limit,
+              // showSizeChanger: true,
+              // showQuickJumper: true,
+              // showTotal: (total, range) =>
+              //   `${range[0]}-${range[1]} of ${total} items`,
+              style: { marginTop: "24px" },
+              // pageSizeOptions: ["10", "25", "50"],
+              onChange: (newPage, newPageSize) => {
+                setPage(newPage);
+                setLimit(newPageSize);
+              },
+            }}
+            size="middle"
+            style={{
+              background: "white",
+            }}
+            scroll={{ x: "max-content" }}
+            rowClassName={(record, index) =>
+              index % 2 === 0 ? "user-table-row-even" : "user-table-row-odd"
+            }
+          />
+        </Spin>
       </Card>
 
       <style jsx global>{`
@@ -484,33 +423,32 @@ const UserManagement = () => {
         .ant-pagination-item-active {
           background: linear-gradient(
             135deg,
-            ##CDA861 0%,
-            #764ba2 100%
+            #cda861 0%,
+            #cda861 100%
           ) !important;
-          border-color: ##CDA861 !important;
-          color: black !important;
+          border-color: #cda861 !important;
         }
 
         .ant-pagination-item-active a {
-          color: black !important;
+          color: white !important;
         }
 
         .ant-select:not(.ant-select-disabled):hover .ant-select-selector {
-          border-color: ##CDA861 !important;
+          border-color: #cda861 !important;
         }
 
         .ant-select-focused .ant-select-selector {
-          border-color: ##CDA861 !important;
-          box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2) !important;
+          border-color: #cda861 !important;
+          box-shadow: 0 0 0 2px rgba(205, 168, 97, 0.2) !important;
         }
 
         .ant-input:hover {
-          border-color: ##CDA861 !important;
+          border-color: #cda861 !important;
         }
 
         .ant-input:focus {
-          border-color: ##CDA861 !important;
-          box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2) !important;
+          border-color: #cda861 !important;
+          box-shadow: 0 0 0 2px rgba(205, 168, 97, 0.2) !important;
         }
 
         .ant-card {
@@ -519,7 +457,7 @@ const UserManagement = () => {
 
         .ant-btn-primary:hover {
           transform: translateY(-1px);
-          box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
+          box-shadow: 0 4px 16px rgba(205, 168, 97, 0.3);
           transition: all 0.2s ease;
         }
 

@@ -1,66 +1,65 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import JoditEditor from "jodit-react";
-import GradientButton from "../../components/common/GradiantButton";
-import { Button, message, Modal, Tabs } from "antd";
+import { Button, message, Modal, Tabs, Spin } from "antd";
+import { useGetSettingQuery, useUpdateSettingMutation } from "../../redux/apiSlices/settingsApi";
 
 const TermsAndCondition = () => {
   const editor = useRef(null);
   
-  // Separate content for Service Provider and Customer
-  const [serviceProviderContent, setServiceProviderContent] = useState(`
-    <h2 style="font-size: 24px; font-weight: bold; color: #333;">Terms & Conditions - Service Provider</h2>
-    <p style="font-size: 16px; color: #555;">Welcome to our platform as a service provider. By registering and using our services, you agree to comply with and be bound by the following terms and conditions.</p><br />
-    <h3 style="font-size: 20px; font-weight: bold; color: #444;">1. Service Provider Obligations</h3>
-    <p style="font-size: 16px; color: #555;">As a service provider, you are responsible for delivering quality services as described in your profile and maintaining professional standards.</p><br />
-    <h3 style="font-size: 20px; font-weight: bold; color: #444;">2. Payment Terms</h3>
-    <p style="font-size: 16px; color: #555;">Payment processing and commission structures are governed by our payment policy. Service providers will receive payments according to the agreed schedule.</p><br />
-    <h3 style="font-size: 20px; font-weight: bold; color: #444;">3. Service Quality</h3>
-    <p style="font-size: 16px; color: #555;">Service providers must maintain high quality standards and respond to customer inquiries promptly and professionally.</p>
-  `);
-
-  const [customerContent, setCustomerContent] = useState(`
-    <h2 style="font-size: 24px; font-weight: bold; color: #333;">Terms & Conditions - Customer</h2>
-    <p style="font-size: 16px; color: #555;">Welcome to our platform. As a customer, these terms and conditions govern your use of our services and your relationship with service providers.</p><br />
-    <h3 style="font-size: 20px; font-weight: bold; color: #444;">1. Service Booking</h3>
-    <p style="font-size: 16px; color: #555;">Customers can book services through our platform. All bookings are subject to availability and service provider confirmation.</p><br />
-    <h3 style="font-size: 20px; font-weight: bold; color: #444;">2. Payment Policy</h3>
-    <p style="font-size: 16px; color: #555;">Payment must be made according to the terms specified for each service. Refund policies may vary based on the service type and provider.</p><br />
-    <h3 style="font-size: 20px; font-weight: bold; color: #444;">3. Customer Responsibilities</h3>
-    <p style="font-size: 16px; color: #555;">Customers are expected to provide accurate information and communicate respectfully with service providers.</p>
-  `);
-
+  const [serviceProviderContent, setServiceProviderContent] = useState("");
+  const [customerContent, setCustomerContent] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("service-provider");
   const [modalActiveTab, setModalActiveTab] = useState("service-provider");
 
+  // Fetch data for both types
+  const { data: providerData, isLoading: providerLoading } = useGetSettingQuery("provider-terms-and-conditions");
+  const { data: customerData, isLoading: customerLoading } = useGetSettingQuery("customer-terms-and-conditions");
+  
+  const [updateSetting, { isLoading: isUpdating }] = useUpdateSettingMutation();
+
+  // Set content when data is loaded
+  useEffect(() => {
+    if (providerData?.data?.content) {
+      setServiceProviderContent(providerData.data.content);
+    }
+  }, [providerData]);
+
+  useEffect(() => {
+    if (customerData?.data?.content) {
+      setCustomerContent(customerData.data.content);
+    }
+  }, [customerData]);
+
   const showModal = () => {
-    setModalActiveTab(activeTab); // Set modal tab to match current active tab
+    setModalActiveTab(activeTab);
     setIsModalOpen(true);
   };
 
-  const handleOk = () => {
-    setIsModalOpen(false);
-    message.success("Terms & Conditions updated successfully!");
+  const handleOk = async () => {
+    try {
+      const type = modalActiveTab === "service-provider" 
+        ? "provider-terms-and-conditions" 
+        : "customer-terms-and-conditions";
+      
+      const content = modalActiveTab === "service-provider" 
+        ? serviceProviderContent 
+        : customerContent;
+
+      await updateSetting({
+        type,
+        content
+      }).unwrap();
+
+      setIsModalOpen(false);
+      message.success("Terms & Conditions updated successfully!");
+    } catch (error) {
+      message.error("Failed to update Terms & Conditions. Please try again.");
+    }
   };
 
   const handleCancel = () => {
     setIsModalOpen(false);
-  };
-
-  const getCurrentContent = () => {
-    return activeTab === "service-provider" ? serviceProviderContent : customerContent;
-  };
-
-  const getCurrentModalContent = () => {
-    return modalActiveTab === "service-provider" ? serviceProviderContent : customerContent;
-  };
-
-  const handleContentChange = (newContent) => {
-    if (modalActiveTab === "service-provider") {
-      setServiceProviderContent(newContent);
-    } else {
-      setCustomerContent(newContent);
-    }
   };
 
   const tabItems = [
@@ -69,10 +68,16 @@ const TermsAndCondition = () => {
       label: "Service Provider",
       children: (
         <div className="saved-content border p-6 rounded-lg bg-white">
-          <div
-            dangerouslySetInnerHTML={{ __html: serviceProviderContent }}
-            className="prose max-w-none"
-          />
+          {providerLoading ? (
+            <div className="flex justify-center items-center py-10">
+              <Spin size="large" />
+            </div>
+          ) : (
+            <div
+              dangerouslySetInnerHTML={{ __html: serviceProviderContent }}
+              className="prose max-w-none"
+            />
+          )}
         </div>
       ),
     },
@@ -81,10 +86,16 @@ const TermsAndCondition = () => {
       label: "Customer",
       children: (
         <div className="saved-content border p-6 rounded-lg bg-white">
-          <div
-            dangerouslySetInnerHTML={{ __html: customerContent }}
-            className="prose max-w-none"
-          />
+          {customerLoading ? (
+            <div className="flex justify-center items-center py-10">
+              <Spin size="large" />
+            </div>
+          ) : (
+            <div
+              dangerouslySetInnerHTML={{ __html: customerContent }}
+              className="prose max-w-none"
+            />
+          )}
         </div>
       ),
     },
@@ -159,6 +170,7 @@ const TermsAndCondition = () => {
             key="cancel"
             onClick={handleCancel}
             className="bg-red-500 text-white mr-2 py-5"
+            disabled={isUpdating}
           >
             Cancel
           </Button>,
@@ -166,6 +178,7 @@ const TermsAndCondition = () => {
             key="submit"
             onClick={handleOk}
             className="bg-[#CDA861] text-white"
+            loading={isUpdating}
           >
             Update Terms & Conditions
           </Button>,
