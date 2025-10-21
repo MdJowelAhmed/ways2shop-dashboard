@@ -12,43 +12,51 @@ import {
 } from "antd";
 import GradientButton from "../../../components/common/GradiantButton";
 import { UploadOutlined } from "@ant-design/icons";
+import {
+  useProfileQuery,
+  useUpdateProfileMutation,
+} from "../../../redux/apiSlices/authSlice";
+import { getImageUrl } from "../../../components/common/imageUrl";
 
 const { Option } = Select;
 
 const UserProfile = () => {
   const [form] = Form.useForm();
   const [imageUrl, setImageUrl] = useState(null);
-  const [fileList, setFileList] = useState([]); // State to handle file list
-
-  // Dummy data (to be used as the default data)
-  const dummyData = {
-    username: "Md Mijanur Rahman",
-    email: "mijan17634@gmail.com",
-    contact: "+8801234567890",
-    address: "1234 Main St, Springfield, USA",
-    language: "english",
-    profileImage: "https://i.ibb.co.com/Qjf2hxsf/images-2.jpg",
-  };
+  const [fileList, setFileList] = useState([]);
+  const { data: userData, isLoading } = useProfileQuery();
+  console.log("userData", userData);
+  const [updateProfile, { isLoading: updateLoading }] =
+    useUpdateProfileMutation();
 
   useEffect(() => {
-    // Set initial values and the profile image if it exists
-    form.setFieldsValue(dummyData);
+    if (userData?.data) {
+      // Set form values from API response
+      form.setFieldsValue({
+        username: userData.data.name,
+        email: userData.data.email,
+        contact: userData.data.contact || "",
+      });
 
-    // Set the image URL and file list if a profile image exists
-    if (dummyData.profileImage) {
-      setImageUrl(dummyData.profileImage);
-      setFileList([
-        {
-          uid: "-1",
-          name: "profile.jpg",
-          status: "done",
-          url: dummyData.profileImage,
-        },
-      ]);
+      // Set profile image if exists
+      if (userData.data.profile) {
+        const profileImageUrl = `${import.meta.env.VITE_API_URL || ""}${
+          userData.data.profile
+        }`;
+        setImageUrl(profileImageUrl);
+        setFileList([
+          {
+            uid: "-1",
+            name: "profile.jpg",
+            status: "done",
+            url: profileImageUrl,
+          },
+        ]);
+      }
     }
-  }, [form]);
+  }, [userData, form]);
 
-  // Clean up blob URLs when component unmounts to prevent memory leaks
+  // Clean up blob URLs when component unmounts
   useEffect(() => {
     return () => {
       if (imageUrl && imageUrl.startsWith("blob:")) {
@@ -57,41 +65,43 @@ const UserProfile = () => {
     };
   }, [imageUrl]);
 
-  const onFinish = (values) => {
-    // Get the file object itself, not just the URL
-    const imageFile = fileList.length > 0 ? fileList[0].originFileObj : null;
+  const onFinish = async (values) => {
+    try {
+      // Create FormData object
+      const formData = new FormData();
 
-    console.log("Form Values on Submit:", values);
-    console.log("Image File:", imageFile); // Log the actual file object
+      // Append name field
+      formData.append("name", values.username);
 
-    // Create a FormData object for server submission with file
-    const formData = new FormData();
-    Object.keys(values).forEach((key) => {
-      formData.append(key, values[key]);
-    });
+      // Append contact field
+      if (values.contact) {
+        formData.append("contact", values.contact);
+      }
 
-    if (imageFile) {
-      formData.append("profileImage", imageFile);
-    } else if (imageUrl) {
-      // If using existing image (not a new upload)
-      formData.append("profileImageUrl", imageUrl);
+      // Append image file if a new one was uploaded
+      if (fileList.length > 0 && fileList[0].originFileObj) {
+        formData.append("image", fileList[0].originFileObj);
+      }
+
+      // Log FormData contents (for debugging)
+      console.log("FormData contents:");
+      for (let pair of formData.entries()) {
+        console.log(pair[0] + ": " + pair[1]);
+      }
+
+      // Call the mutation
+      const response = await updateProfile(formData).unwrap();
+
+      message.success("Profile Updated Successfully!");
+      console.log("Update response:", response);
+    } catch (error) {
+      console.error("Update error:", error);
+      message.error(error?.data?.message || "Failed to update profile");
     }
-
-    console.log("FormData created successfully");
-
-    // For displaying in console what would be sent to server
-    for (let pair of formData.entries()) {
-      console.log(pair[0] + ": " + pair[1]);
-    }
-
-    // Here you would normally send the formData to your API
-    // axios.post('/api/updateProfile', formData)
-
-    message.success("Profile Updated Successfully!");
   };
 
   const handleImageChange = ({ fileList: newFileList }) => {
-    // Only keep the most recent file in the list
+    // Only keep the most recent file
     const limitedFileList = newFileList.slice(-1);
     setFileList(limitedFileList);
 
@@ -105,8 +115,6 @@ const UserProfile = () => {
       }
 
       setImageUrl(newImageUrl);
-    } else {
-      setImageUrl(null);
     }
   };
 
@@ -117,23 +125,26 @@ const UserProfile = () => {
         message: "Invalid File Type",
         description: "Please upload an image file.",
       });
+      return false;
     }
 
-    // Check file size (optional)
     const isLessThan2MB = file.size / 1024 / 1024 < 2;
     if (!isLessThan2MB) {
       notification.error({
         message: "File too large",
         description: "Image must be smaller than 2MB.",
       });
+      return false;
     }
 
-    return isImage && isLessThan2MB;
+    return false; // Prevent auto upload, we'll handle it manually
   };
 
-  const handleFormSubmit = () => {
-    form.submit(); // This will trigger the onFinish function
-  };
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center p-10">Loading...</div>
+    );
+  }
 
   return (
     <div className="flex justify-center items-center shadow-xl rounded-lg pt-5 pb-12">
@@ -142,7 +153,6 @@ const UserProfile = () => {
         layout="vertical"
         style={{ width: "80%" }}
         onFinish={onFinish}
-        encType="multipart/form-data"
       >
         <div className="flex flex-col gap-5">
           {/* Profile Image */}
@@ -151,7 +161,6 @@ const UserProfile = () => {
               <Upload
                 name="avatar"
                 showUploadList={false}
-                action="/upload" // This will be overridden by the manual form submission
                 onChange={handleImageChange}
                 beforeUpload={beforeUpload}
                 fileList={fileList}
@@ -159,24 +168,36 @@ const UserProfile = () => {
                 maxCount={1}
               >
                 {imageUrl ? (
-                  <Avatar size={100} src={imageUrl} />
+                  <Avatar
+                    size={100}
+                    src={
+                      typeof imageUrl === "string" &&
+                      (imageUrl.startsWith("blob:") ||
+                        imageUrl.startsWith("data:"))
+                        ? imageUrl // 🔹 local preview
+                        : getImageUrl(imageUrl) // 🔹 server image
+                    }
+                  />
                 ) : (
                   <Avatar size={100} icon={<UploadOutlined />} />
                 )}
               </Upload>
             </Form.Item>
-            <h2 className="text-[24px] font-bold">Sabbir Ahmed</h2>
+
+            <h2 className="text-[24px] font-bold">
+              {userData?.data?.name || "User"}
+            </h2>
           </div>
 
-          {/* Username */}
+          {/* Full Name */}
           <Form.Item
             name="username"
             label="Full Name"
             style={{ marginBottom: 0 }}
-            rules={[{ required: true, message: "Please enter your username" }]}
+            rules={[{ required: true, message: "Please enter your full name" }]}
           >
             <Input
-              placeholder="Enter your Username"
+              placeholder="Enter your Full Name"
               style={{
                 height: "45px",
                 backgroundColor: "#f7f7f7",
@@ -202,22 +223,23 @@ const UserProfile = () => {
                 height: "45px",
                 backgroundColor: "#f7f7f7",
                 borderRadius: "8px",
-                // border: "1px solid #E0E4EC",
                 outline: "none",
               }}
-              disabled // Disable the email field
+              disabled
             />
           </Form.Item>
 
-          {/* Username */}
+          {/* Contact Number */}
           <Form.Item
             name="contact"
             label="Contact Number"
             style={{ marginBottom: 0 }}
-            rules={[{ required: true, message: "Please enter your username" }]}
+            rules={[
+              { required: true, message: "Please enter your contact number" },
+            ]}
           >
             <Input
-              placeholder="Enter your Username"
+              placeholder="Enter your Contact Number"
               style={{
                 height: "45px",
                 backgroundColor: "#f7f7f7",
@@ -227,65 +249,18 @@ const UserProfile = () => {
             />
           </Form.Item>
 
-          {/* Address */}
-          {/* <Form.Item
-            name="address"
-            label="Address"
-            style={{ marginBottom: 0 }}
-            rules={[{ required: true, message: "Please enter your address" }]}
-          >
-            <Input
-              placeholder="Enter your Address"
-              style={{
-                height: "45px",
-                backgroundColor: "#f7f7f7",
-                borderRadius: "8px",
-                outline: "none",
-              }}
-            />
-          </Form.Item> */}
-
-          {/* Language */}
-          {/* <Form.Item
-            name="language"
-            label="Language"
-            style={{ marginBottom: 0 }}
-            rules={[{ required: true, message: "Please select your language" }]}
-          >
-            <Select
-              placeholder="Select your Language"
-              style={{
-                height: "45px",
-                backgroundColor: "#f7f7f7",
-                borderRadius: "8px",
-                border: "1px solid #E0E4EC", // Custom border for language
-              }}
-            >
-              <Option value="english">English</Option>
-              <Option value="french">French</Option>
-              <Option value="spanish">Spanish</Option>
-            </Select>
-          </Form.Item> */}
-
           {/* Update Profile Button */}
           <div className="col-span-2 text-end mt-6">
             <Form.Item>
-              {/* Option 1: Use standard Ant Design Button */}
               <Button
                 type="primary"
                 htmlType="submit"
                 block
+                loading={updateLoading}
                 style={{ height: 40 }}
               >
                 Save Changes
               </Button>
-
-              {/* Option 2: Use GradientButton with onClick handler */}
-              {/* 
-              <GradientButton onClick={handleFormSubmit} block>
-                Update Profile
-              </GradientButton>
-              */}
             </Form.Item>
           </div>
         </div>
