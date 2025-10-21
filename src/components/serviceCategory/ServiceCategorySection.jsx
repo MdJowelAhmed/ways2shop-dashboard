@@ -295,6 +295,22 @@ const ServiceCategorySection = () => {
       ),
     },
     {
+      title: "Total Providers",
+      dataIndex: "totalProviders",
+      key: "totalProviders",
+      width: 250,
+      align: "center",
+    
+    },
+    {
+      title: "Total Jobs",
+      dataIndex: "totalJobs",
+      key: "totalJobs",
+      width: 250,
+      align: "center",
+    
+    },
+    {
       title: "Created",
       dataIndex: "createdAt",
       key: "createdAt",
