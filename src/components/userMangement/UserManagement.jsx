@@ -122,7 +122,7 @@ const UserManagement = () => {
               src={imageSrc}
               icon={!hasProfile && <UserOutlined />}
               style={{
-                backgroundColor: hasProfile ? "transparent" : "#1890ff",
+                backgroundColor: hasProfile ? "transparent" : "#CDA861",
                 height: "42px",
                 width: "42px",
               }}
@@ -190,8 +190,8 @@ const UserManagement = () => {
               borderRadius: "16px",
               fontSize: "12px",
               fontWeight: "500",
-              minWidth: "80px",
-              height: "28px",
+              minWidth: "100px",
+              height: "40px",
             }}
           >
             {status}

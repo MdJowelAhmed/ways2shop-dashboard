@@ -1,29 +1,72 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { FaRegBell } from "react-icons/fa6";
 import { Badge, Button, Dropdown, Menu, Modal } from "antd";
-import { IoIosLogOut } from "react-icons/io";
 import Avatar from "../../assets/avatar.png";
 import { useProfileQuery } from "../../redux/apiSlices/authSlice";
+import { useGetNotificationsQuery } from "../../redux/apiSlices/notificationSlice";
 import { getImageUrl } from "../../components/common/imageUrl";
+// import socketService from "../../services/socketService";
+import toast from "react-hot-toast";
+import socketService from "../../components/common/socketService";
 
 const Header = ({ toggleSidebar, isMobile }) => {
-  const [isLogoutModalOpen, setIsLogoutModalOpen] = React.useState(false);
-  const {data:userData} = useProfileQuery();
-  console.log(userData);
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+  const { data: userData } = useProfileQuery();
+  const { data: notificationsData, refetch } = useGetNotificationsQuery([
+    { name: 'page', value: 1 },
+    { name: 'limit', value: 10 }
+  ]);
+
+  const unreadCount = notificationsData?.data?.unreadCount || 0;
+
+  // Socket connection and notification listener
+  useEffect(() => {
+    if (userData?.data?._id) {
+      socketService.connect(userData.data._id);
+
+      const notificationEvent = `get-notification::${userData.data._id}`;
+      
+      const handleNewNotification = (data) => {
+        console.log("New notification in header:", data);
+        
+        // Show toast notification
+        toast.success(
+          <div>
+            <strong>{data.title}</strong>
+            <p className="text-sm">{data.message}</p>
+          </div>,
+          {
+            duration: 4000,
+            icon: '🔔'
+          }
+        );
+        
+        // Refetch to update badge count
+        refetch();
+      };
+
+      socketService.on(notificationEvent, handleNewNotification);
+
+      return () => {
+        socketService.off(notificationEvent, handleNewNotification);
+      };
+    }
+  }, [userData?.data?._id, refetch]);
 
   const showLogoutConfirm = () => {
-    setIsLogoutModalOpen(true); 
+    setIsLogoutModalOpen(true);
   };
 
   const handleLogout = () => {
+    socketService.disconnect();
     localStorage.removeItem("token");
-    setIsLogoutModalOpen(false); 
-    window.location.href = "/auth/login"; 
+    setIsLogoutModalOpen(false);
+    window.location.href = "/auth/login";
   };
 
   const handleCancelLogout = () => {
-    setIsLogoutModalOpen(false); 
+    setIsLogoutModalOpen(false);
   };
 
   const menu = (
@@ -64,15 +107,19 @@ const Header = ({ toggleSidebar, isMobile }) => {
         <Dropdown overlay={menu} trigger={["click"]} placement="bottomRight">
           <div className="flex items-center gap-3 cursor-pointer">
             <div className="flex flex-row gap-1">
-              <p>Hello,</p> <p className="text-[16px] font-semibold">{userData?.data?.name}</p>
+              <p>Hello,</p> 
+              <p className="text-[16px] font-semibold">
+                {userData?.data?.name}
+              </p>
             </div>
             <img
               style={{
                 clipPath: "circle()",
                 width: 45,
                 height: 45,
+                objectFit: "cover"
               }}
-              src={getImageUrl(userData?.data?.profile)}
+              src={getImageUrl(userData?.data?.profile) || Avatar}
               alt="profile-pic"
               className="clip"
             />
@@ -81,8 +128,19 @@ const Header = ({ toggleSidebar, isMobile }) => {
 
         {/* Notification Icon */}
         <Link to="/notification" className="h-fit mt-[10px]">
-          <Badge count={5} backgroundColor="#3FC7EE">
-            <FaRegBell color="#198248" size={24} />
+          <Badge 
+            count={unreadCount} 
+            overflowCount={99}
+            style={{ 
+              backgroundColor: '#3FC7EE',
+              boxShadow: '0 0 0 1px #d9d9d9 inset'
+            }}
+          >
+            <FaRegBell 
+              color="#198248" 
+              size={24}
+              className={unreadCount > 0 ? 'animate-pulse' : ''}
+            />
           </Badge>
         </Link>
       </div>
