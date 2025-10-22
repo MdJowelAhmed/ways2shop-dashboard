@@ -336,6 +336,7 @@ const ServiceCategorySection = () => {
         <Switch
           checked={status === "ACTIVE"}
           onChange={() => toggleStatus(record)}
+          size="medium"
         />
       ),
     },
@@ -346,7 +347,7 @@ const ServiceCategorySection = () => {
       align: "center",
       render: (_, record) => (
         <Space size={4}>
-          <Tooltip title="View Details">
+          {/* <Tooltip title="View Details">
             <Button
               type="text"
               icon={<EyeOutlined />}
@@ -357,14 +358,14 @@ const ServiceCategorySection = () => {
               style={{ color: "#1890ff" }}
               size="small"
             />
-          </Tooltip>
+          </Tooltip> */}
           <Tooltip title="Edit Category">
             <Button
               type="text"
               icon={<EditOutlined />}
               onClick={() => handleEdit(record)}
-              style={{ color: "#52c41a" }}
-              size="small"
+              style={{ color: "#CDA861" }}
+              size="large"
             />
           </Tooltip>
           <Tooltip title="Delete Category">
@@ -373,7 +374,7 @@ const ServiceCategorySection = () => {
               icon={<DeleteOutlined />}
               onClick={() => handleDelete(record._id)}
               style={{ color: "#ff4d4f" }}
-              size="small"
+              size="large"
             />
           </Tooltip>
         </Space>
@@ -495,6 +496,7 @@ const ServiceCategorySection = () => {
           width={500}
           centered
           okText="Save Changes"
+
           cancelText="Cancel"
           confirmLoading={modalLoading}
           okButtonProps={{
@@ -502,6 +504,13 @@ const ServiceCategorySection = () => {
               background: "linear-gradient(45deg, #CDA861, #CDA861)",
               border: "none",
               borderRadius: 6,
+              height: 45,
+            },
+          }}
+          cancelButtonProps={{
+            style: {
+              height: 45,
+              width: 120,
             },
           }}
         >
@@ -546,6 +555,7 @@ const ServiceCategorySection = () => {
                   borderRadius: 20,
                   borderColor: "#CDA861",
                   color: "#CDA861",
+                  height: 45,
                 }}
               >
                 Upload Image
@@ -567,14 +577,14 @@ const ServiceCategorySection = () => {
             >
               <Input
                 placeholder="Enter category name"
-                style={{ borderRadius: 8 }}
+                style={{ borderRadius: 8 , height: 45}}
               />
             </Form.Item>
           </Form>
         </Modal>
 
         {/* Details Modal */}
-        <Modal
+        {/* <Modal
           title={
             <div style={{ textAlign: "center" }}>
               <h3 style={{ margin: 0, color: "#CDA861" }}>Category Details</h3>
@@ -674,7 +684,7 @@ const ServiceCategorySection = () => {
               </div>
             </div>
           )}
-        </Modal>
+        </Modal> */}
       </Card>
     </div>
   );

@@ -4,11 +4,13 @@ import { FaRegBell } from "react-icons/fa6";
 import { Badge, Button, Dropdown, Menu, Modal } from "antd";
 import { IoIosLogOut } from "react-icons/io";
 import Avatar from "../../assets/avatar.png";
-import { useGetAllUsersQuery } from "../../redux/apiSlices/userSlice";
+import { useProfileQuery } from "../../redux/apiSlices/authSlice";
+import { getImageUrl } from "../../components/common/imageUrl";
 
 const Header = ({ toggleSidebar, isMobile }) => {
   const [isLogoutModalOpen, setIsLogoutModalOpen] = React.useState(false);
-  const {data:userData} = useGetAllUsersQuery();
+  const {data:userData} = useProfileQuery();
+  console.log(userData);
 
   const showLogoutConfirm = () => {
     setIsLogoutModalOpen(true); 
@@ -62,7 +64,7 @@ const Header = ({ toggleSidebar, isMobile }) => {
         <Dropdown overlay={menu} trigger={["click"]} placement="bottomRight">
           <div className="flex items-center gap-3 cursor-pointer">
             <div className="flex flex-row gap-1">
-              <p>Hello,</p> <p className="text-[16px] font-semibold">Sabbir</p>
+              <p>Hello,</p> <p className="text-[16px] font-semibold">{userData?.data?.name}</p>
             </div>
             <img
               style={{
@@ -70,7 +72,7 @@ const Header = ({ toggleSidebar, isMobile }) => {
                 width: 45,
                 height: 45,
               }}
-              src={Avatar}
+              src={getImageUrl(userData?.data?.profile)}
               alt="profile-pic"
               className="clip"
             />

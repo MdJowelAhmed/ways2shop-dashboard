@@ -78,7 +78,7 @@ const UserManagement = () => {
   };
 
   const getStatusColor = (status) => {
-    return status === "ACTIVE" ? "#52c41a" : "#ff4d4f";
+    return status === "ACTIVE" ? "#CDA861" : "#ff4d4f";
   };
 
   const statusMenu = (record) => (

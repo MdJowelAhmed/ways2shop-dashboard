@@ -10,20 +10,21 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { useGetReportAnalysisQuery } from "../../redux/apiSlices/reportAnalysisApi";
-// import { useGetReportAnalysisQuery } from "../api/reportAnalysisApi";
+import { Button } from "antd";
+import * as XLSX from "xlsx";
 
 // Category mapping for API
 const categoryMapping = {
   "Subscription Revenue": "revenue",
   "Service Provider": "providers",
-  "Customers": "customers",
+  Customers: "customers",
 };
 
 const categoryOptions = [
   "All",
   "Subscription Revenue",
   "Service Provider",
-  "Customers"
+  "Customers",
 ];
 
 // Custom 3D Bar with watermark
@@ -112,28 +113,32 @@ export default function MonthlyStatsChart() {
       endYear,
       endMonth,
     };
-    
+
     if (selectedCategory !== "All") {
       params.type = categoryMapping[selectedCategory];
     }
-    
+
     return params;
   }, [startYear, startMonth, endYear, endMonth, selectedCategory]);
 
   // Fetch data from API
-  const { data: apiResponse, isLoading, error } = useGetReportAnalysisQuery(queryParams);
+  const {
+    data: apiResponse,
+    isLoading,
+    error,
+  } = useGetReportAnalysisQuery(queryParams);
 
   // Process data for chart
   const chartData = useMemo(() => {
     if (!apiResponse?.data) return [];
-    
+
     return apiResponse.data.map((item, index) => ({
       sl: index + 1,
       date: item.label,
       month: item.month,
       "Subscription Revenue": item.revenue || 0,
       "Service Provider": item.providers || 0,
-      "Customers": item.customers || 0,
+      Customers: item.customers || 0,
     }));
   }, [apiResponse]);
 
@@ -143,14 +148,20 @@ export default function MonthlyStatsChart() {
       return {
         "Subscription Revenue": 100,
         "Service Provider": 100,
-        "Customers": 100,
+        Customers: 100,
       };
     }
-    
+
     return {
-      "Subscription Revenue": Math.max(...chartData.map((d) => d["Subscription Revenue"]), 1),
-      "Service Provider": Math.max(...chartData.map((d) => d["Service Provider"]), 1),
-      "Customers": Math.max(...chartData.map((d) => d["Customers"]), 1),
+      "Subscription Revenue": Math.max(
+        ...chartData.map((d) => d["Subscription Revenue"]),
+        1
+      ),
+      "Service Provider": Math.max(
+        ...chartData.map((d) => d["Service Provider"]),
+        1
+      ),
+      Customers: Math.max(...chartData.map((d) => d["Customers"]), 1),
     };
   }, [chartData]);
 
@@ -189,25 +200,73 @@ export default function MonthlyStatsChart() {
         ...baseColumns,
         { title: "Subscription Revenue", key: "Subscription Revenue" },
         { title: "Service Provider", key: "Service Provider" },
-        { title: "Customers", key: "Customers" }
+        { title: "Customers", key: "Customers" },
       ];
     } else {
       return [
         ...baseColumns,
-        { title: selectedCategory, key: selectedCategory }
+        { title: selectedCategory, key: selectedCategory },
       ];
     }
   };
 
+  // Export to Excel function
+  const exportToExcel = () => {
+    if (chartData.length === 0) {
+      alert("No data to export");
+      return;
+    }
+
+    // Prepare data for export
+    const columns = getTableColumns();
+    const exportData = chartData.map((row, index) => {
+      const rowData = {
+        SL: index + 1,
+        Date: row.date,
+      };
+
+      if (selectedCategory === "All") {
+        rowData["Subscription Revenue"] = row["Subscription Revenue"];
+        rowData["Service Provider"] = row["Service Provider"];
+        rowData["Customers"] = row["Customers"];
+      } else {
+        rowData[selectedCategory] = row[selectedCategory];
+      }
+
+      return rowData;
+    });
+
+    // Create worksheet
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+
+    // Set column widths
+    const columnWidths = columns.map((col) => ({
+      wch: col.title.length + 5,
+    }));
+    worksheet["!cols"] = columnWidths;
+
+    // Create workbook
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Monthly Stats");
+
+    // Generate filename with date range
+    const filename = `Monthly_Stats_${startMonth}-${startYear}_to_${endMonth}-${endYear}.xlsx`;
+
+    // Save file
+    XLSX.writeFile(workbook, filename);
+  };
+
   if (isLoading) {
     return (
-      <div style={{ 
-        width: "100%", 
-        padding: "2rem", 
-        textAlign: "center",
-        fontSize: "18px",
-        color: "#6b7280"
-      }}>
+      <div
+        style={{
+          width: "100%",
+          padding: "2rem",
+          textAlign: "center",
+          fontSize: "18px",
+          color: "#6b7280",
+        }}
+      >
         Loading data...
       </div>
     );
@@ -215,20 +274,28 @@ export default function MonthlyStatsChart() {
 
   if (error) {
     return (
-      <div style={{ 
-        width: "100%", 
-        padding: "2rem", 
-        textAlign: "center",
-        fontSize: "18px",
-        color: "#ef4444"
-      }}>
+      <div
+        style={{
+          width: "100%",
+          padding: "2rem",
+          textAlign: "center",
+          fontSize: "18px",
+          color: "#ef4444",
+        }}
+      >
         Error loading data. Please try again.
       </div>
     );
   }
 
   return (
-    <div style={{ width: "100%", padding: "1rem", fontFamily: "Arial, sans-serif" }}>
+    <div
+      style={{
+        width: "100%",
+        padding: "1rem",
+        fontFamily: "Arial, sans-serif",
+      }}
+    >
       {/* Filter Controls */}
       <div
         style={{
@@ -244,11 +311,11 @@ export default function MonthlyStatsChart() {
           <select
             value={startMonth}
             onChange={(e) => setStartMonth(Number(e.target.value))}
-            style={{ 
-              padding: "8px 12px", 
-              border: "1px solid #d1d5db", 
+            style={{
+              padding: "8px 12px",
+              border: "1px solid #d1d5db",
               borderRadius: "4px",
-              minWidth: "120px"
+              minWidth: "120px",
             }}
           >
             {monthOptions.map((option) => (
@@ -260,11 +327,11 @@ export default function MonthlyStatsChart() {
           <select
             value={startYear}
             onChange={(e) => setStartYear(Number(e.target.value))}
-            style={{ 
-              padding: "8px 12px", 
-              border: "1px solid #d1d5db", 
+            style={{
+              padding: "8px 12px",
+              border: "1px solid #d1d5db",
               borderRadius: "4px",
-              minWidth: "100px"
+              minWidth: "100px",
             }}
           >
             {yearOptions.map((year) => (
@@ -280,11 +347,11 @@ export default function MonthlyStatsChart() {
           <select
             value={endMonth}
             onChange={(e) => setEndMonth(Number(e.target.value))}
-            style={{ 
-              padding: "8px 12px", 
-              border: "1px solid #d1d5db", 
+            style={{
+              padding: "8px 12px",
+              border: "1px solid #d1d5db",
               borderRadius: "4px",
-              minWidth: "120px"
+              minWidth: "120px",
             }}
           >
             {monthOptions.map((option) => (
@@ -296,11 +363,11 @@ export default function MonthlyStatsChart() {
           <select
             value={endYear}
             onChange={(e) => setEndYear(Number(e.target.value))}
-            style={{ 
-              padding: "8px 12px", 
-              border: "1px solid #d1d5db", 
+            style={{
+              padding: "8px 12px",
+              border: "1px solid #d1d5db",
               borderRadius: "4px",
-              minWidth: "100px"
+              minWidth: "100px",
             }}
           >
             {yearOptions.map((year) => (
@@ -312,15 +379,17 @@ export default function MonthlyStatsChart() {
         </div>
 
         <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-          <label style={{ fontWeight: "bold", minWidth: "80px" }}>Category:</label>
+          <label style={{ fontWeight: "bold", minWidth: "80px" }}>
+            Category:
+          </label>
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
-            style={{ 
-              padding: "8px 12px", 
-              border: "1px solid #d1d5db", 
+            style={{
+              padding: "8px 12px",
+              border: "1px solid #d1d5db",
               borderRadius: "4px",
-              minWidth: "180px"
+              minWidth: "180px",
             }}
           >
             {categoryOptions.map((option) => (
@@ -341,7 +410,7 @@ export default function MonthlyStatsChart() {
           borderRadius: "8px",
           padding: "1rem",
           backgroundColor: "#ffffff",
-          marginBottom: "2rem"
+          marginBottom: "2rem",
         }}
       >
         <ResponsiveContainer width="100%" height="100%">
@@ -356,39 +425,42 @@ export default function MonthlyStatsChart() {
             <YAxis />
             <Tooltip />
             <Legend />
-            {(selectedCategory === "All" || selectedCategory === "Subscription Revenue") && (
+            {(selectedCategory === "All" ||
+              selectedCategory === "Subscription Revenue") && (
               <Bar
                 dataKey="Subscription Revenue"
                 fill="#7086FD"
                 shape={(props) => (
-                  <Custom3DBarWithWatermark 
-                    {...props} 
+                  <Custom3DBarWithWatermark
+                    {...props}
                     dataKey="Subscription Revenue"
                     maxValue={maxValues["Subscription Revenue"]}
                   />
                 )}
               />
             )}
-            {(selectedCategory === "All" || selectedCategory === "Service Provider") && (
+            {(selectedCategory === "All" ||
+              selectedCategory === "Service Provider") && (
               <Bar
                 dataKey="Service Provider"
                 fill="#6FD195"
                 shape={(props) => (
-                  <Custom3DBarWithWatermark 
-                    {...props} 
+                  <Custom3DBarWithWatermark
+                    {...props}
                     dataKey="Service Provider"
                     maxValue={maxValues["Service Provider"]}
                   />
                 )}
               />
             )}
-            {(selectedCategory === "All" || selectedCategory === "Customers") && (
+            {(selectedCategory === "All" ||
+              selectedCategory === "Customers") && (
               <Bar
                 dataKey="Customers"
                 fill="#FFAE4C"
                 shape={(props) => (
-                  <Custom3DBarWithWatermark 
-                    {...props} 
+                  <Custom3DBarWithWatermark
+                    {...props}
                     dataKey="Customers"
                     maxValue={maxValues["Customers"]}
                   />
@@ -401,15 +473,41 @@ export default function MonthlyStatsChart() {
 
       {/* Data Table */}
       <div>
-        <h2 style={{ fontSize: "22px", fontWeight: "bold", marginBottom: "1rem" }}>
-          Data Table
-        </h2>
-        <div style={{ 
-          overflowX: "auto", 
-          border: "1px solid #e5e7eb", 
-          borderRadius: "8px",
-          backgroundColor: "#ffffff"
-        }}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: "1rem",
+          }}
+        >
+          <h2
+            style={{
+              fontSize: "22px",
+              fontWeight: "bold",
+              marginBottom: "1rem",
+            }}
+          >
+            Data Table
+          </h2>
+          <Button
+            type="primary"
+            size="large"
+            style={{ height: 45 }}
+            onClick={exportToExcel}
+            disabled={chartData.length === 0}
+          >
+            Export as Excel
+          </Button>
+        </div>
+        <div
+          style={{
+            overflowX: "auto",
+            border: "1px solid #e5e7eb",
+            borderRadius: "8px",
+            backgroundColor: "#ffffff",
+          }}
+        >
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
               <tr style={{ backgroundColor: "#f9fafb" }}>
@@ -422,7 +520,7 @@ export default function MonthlyStatsChart() {
                       fontWeight: "bold",
                       borderBottom: "2px solid #e5e7eb",
                       fontSize: "14px",
-                      color: "#374151"
+                      color: "#374151",
                     }}
                   >
                     {col.title}
@@ -432,32 +530,68 @@ export default function MonthlyStatsChart() {
             </thead>
             <tbody>
               {chartData.map((row, index) => (
-                <tr 
+                <tr
                   key={index}
                   style={{
-                    backgroundColor: index % 2 === 0 ? "#ffffff" : "#f9fafb"
+                    backgroundColor: index % 2 === 0 ? "#ffffff" : "#f9fafb",
                   }}
                 >
-                  <td style={{ padding: "10px", textAlign: "center", borderBottom: "1px solid #e5e7eb" }}>
+                  <td
+                    style={{
+                      padding: "10px",
+                      textAlign: "center",
+                      borderBottom: "1px solid #e5e7eb",
+                    }}
+                  >
                     {index + 1}
                   </td>
-                  <td style={{ padding: "10px", textAlign: "center", borderBottom: "1px solid #e5e7eb" }}>
+                  <td
+                    style={{
+                      padding: "10px",
+                      textAlign: "center",
+                      borderBottom: "1px solid #e5e7eb",
+                    }}
+                  >
                     {row.date}
                   </td>
                   {selectedCategory === "All" ? (
                     <>
-                      <td style={{ padding: "10px", textAlign: "center", borderBottom: "1px solid #e5e7eb" }}>
+                      <td
+                        style={{
+                          padding: "10px",
+                          textAlign: "center",
+                          borderBottom: "1px solid #e5e7eb",
+                        }}
+                      >
                         {row["Subscription Revenue"]}
                       </td>
-                      <td style={{ padding: "10px", textAlign: "center", borderBottom: "1px solid #e5e7eb" }}>
+                      <td
+                        style={{
+                          padding: "10px",
+                          textAlign: "center",
+                          borderBottom: "1px solid #e5e7eb",
+                        }}
+                      >
                         {row["Service Provider"]}
                       </td>
-                      <td style={{ padding: "10px", textAlign: "center", borderBottom: "1px solid #e5e7eb" }}>
+                      <td
+                        style={{
+                          padding: "10px",
+                          textAlign: "center",
+                          borderBottom: "1px solid #e5e7eb",
+                        }}
+                      >
                         {row["Customers"]}
                       </td>
                     </>
                   ) : (
-                    <td style={{ padding: "10px", textAlign: "center", borderBottom: "1px solid #e5e7eb" }}>
+                    <td
+                      style={{
+                        padding: "10px",
+                        textAlign: "center",
+                        borderBottom: "1px solid #e5e7eb",
+                      }}
+                    >
                       {row[selectedCategory]}
                     </td>
                   )}
@@ -467,12 +601,14 @@ export default function MonthlyStatsChart() {
           </table>
         </div>
         {chartData.length === 0 && (
-          <div style={{ 
-            textAlign: "center", 
-            padding: "2rem", 
-            color: "#6b7280",
-            fontSize: "16px"
-          }}>
+          <div
+            style={{
+              textAlign: "center",
+              padding: "2rem",
+              color: "#6b7280",
+              fontSize: "16px",
+            }}
+          >
             No data found for the selected filters
           </div>
         )}

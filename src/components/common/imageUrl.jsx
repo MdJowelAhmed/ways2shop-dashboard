@@ -1,4 +1,7 @@
 export const getImageUrl = (path) => {
+    if (!path) {
+    return "/assets/image4.png"; // default image
+  }
   if (path.startsWith("http://") || path.startsWith("https://")) {
     return path;
   } else {
