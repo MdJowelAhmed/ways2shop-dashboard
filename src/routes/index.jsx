@@ -51,16 +51,17 @@ import PushNotifications from "../components/pushNotifications/PushNotifications
 // import SalesRepsManagementTable from "../components/SalesRepsManagement/SalesRepsManagement";
 import { Navigate } from "react-router-dom";
 import ServiceCategorySection from "../components/serviceCategory/ServiceCategorySection";
+import PrivateRoute from "./ProtectedRoute";
 
 const router = createBrowserRouter([
   {
     path: "/",
-    // element: (
-    //   <ProtectedRoute>
-    //     <Main />
-    //   </ProtectedRoute>
-    // ),
-    element: <Main />,
+    element: (
+      <PrivateRoute>
+        <Main />
+      </PrivateRoute>
+    ),
+    // element: <Main />,
     children: [
       {
         path: "/",
