@@ -52,6 +52,10 @@ import PushNotifications from "../components/pushNotifications/PushNotifications
 import { Navigate } from "react-router-dom";
 import ServiceCategorySection from "../components/serviceCategory/ServiceCategorySection";
 import PrivateRoute from "./ProtectedRoute";
+import BookingFailed from "../Pages/Dashboard/BookingFailed";
+import BookingSuccess from "../Pages/Dashboard/BookingSuccess";
+import ConnectedAccountSuccess from "../Pages/Dashboard/ConnectedAccountSuccess";
+import ConnectedAccountFailed from "../Pages/Dashboard/ConnectedAccountFailed";
 
 const router = createBrowserRouter([
   {
@@ -231,6 +235,23 @@ const router = createBrowserRouter([
       },
     ],
   },
+  {
+    path: "/booking-failed",
+    element: <BookingFailed />,
+  },
+  {
+    path: "/booking-success",
+    element: <BookingSuccess />,
+  },
+  {
+    path: "/success",
+    element: <ConnectedAccountSuccess />,
+  },
+  {
+    path: "/refresh",
+    element: <ConnectedAccountFailed />,
+  },
+
   {
     path: "*",
     element: <NotFound />,
