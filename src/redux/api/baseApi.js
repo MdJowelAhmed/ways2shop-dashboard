@@ -1,11 +1,11 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 export const api = createApi({
-    reducerPath: "api",
-    baseQuery: fetchBaseQuery({
-        // baseUrl: "http://10.10.7.51:5000/api/v1",
-        baseUrl: "http://206.162.244.188:5001/api/v1",
-         prepareHeaders: (headers) => {
+  reducerPath: "api",
+  baseQuery: fetchBaseQuery({
+    // baseUrl: "http://10.10.7.51:5000/api/v1",
+    baseUrl: "http://172.252.13.77:5000/api/v1",
+    prepareHeaders: (headers) => {
       const token = localStorage.getItem("token");
       if (token) {
         headers.set("authorization", `Bearer ${token}`);
@@ -13,10 +13,10 @@ export const api = createApi({
 
       return headers;
     },
-    }),
-    tagTypes: ["User"],
-    endpoints: () => ({})
+  }),
+  tagTypes: ["User"],
+  endpoints: () => ({}),
 });
 
 // export const imageUrl = "http://206.189.231.81:5000";
-export const imageUrl = "http://206.162.244.188:5001";
+export const imageUrl = "http://172.252.13.77:5000";

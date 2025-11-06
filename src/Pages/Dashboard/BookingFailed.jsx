@@ -8,7 +8,7 @@ const BookingFailed = () => {
     );
 
     if (sessionId) {
-      fetch("http://206.162.244.188:5001/api/v1/payments/cancel", {
+      fetch("http://172.252.13.77:5000/api/v1/payments/cancel", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ sessionId }),
