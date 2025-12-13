@@ -2,12 +2,10 @@ import React, { useState, useRef, useEffect } from "react";
 import JoditEditor from "jodit-react";
 import { Button, message, Modal, Tabs, Spin } from "antd";
 import { useGetSettingQuery, useUpdateSettingMutation } from "../../redux/apiSlices/settingsApi";
-import { useProfileQuery } from "../../redux/apiSlices/authSlice";
 
-const PrivacyPolicy = () => {
+
+const PublicPrivacyPolicy = () => {
   const editor = useRef(null);
-  const {data:user}=useProfileQuery()
-  console.log(user)
   const [serviceProviderContent, setServiceProviderContent] = useState("");
   const [customerContent, setCustomerContent] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -141,8 +139,8 @@ const PrivacyPolicy = () => {
   ];
 
   return (
-    <div className="p-4">
-      <div className="flex justify-between items-center mb-6">
+    <div className="px-20 py-12">
+      {/* <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-bold">Privacy Policy</h2>
         <Button
           onClick={showModal}
@@ -150,7 +148,7 @@ const PrivacyPolicy = () => {
         >
           Update Privacy Policy
         </Button>
-      </div>
+      </div> */}
 
       <div className="mt-6">
         <Tabs
@@ -197,4 +195,4 @@ const PrivacyPolicy = () => {
   );
 };
 
-export default PrivacyPolicy;
+export default PublicPrivacyPolicy;

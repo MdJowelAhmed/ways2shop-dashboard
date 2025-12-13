@@ -56,6 +56,7 @@ import BookingFailed from "../Pages/Dashboard/BookingFailed";
 import BookingSuccess from "../Pages/Dashboard/BookingSuccess";
 import ConnectedAccountSuccess from "../Pages/Dashboard/ConnectedAccountSuccess";
 import ConnectedAccountFailed from "../Pages/Dashboard/ConnectedAccountFailed";
+import PublicPrivacyPolicy from "../Pages/Dashboard/PublicPolicy";
 
 const router = createBrowserRouter([
   {
@@ -250,6 +251,10 @@ const router = createBrowserRouter([
   {
     path: "/refresh",
     element: <ConnectedAccountFailed />,
+  },
+  {
+    path: "/privacy",
+    element: <PublicPrivacyPolicy />,
   },
 
   {
