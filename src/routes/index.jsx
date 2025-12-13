@@ -57,6 +57,7 @@ import BookingSuccess from "../Pages/Dashboard/BookingSuccess";
 import ConnectedAccountSuccess from "../Pages/Dashboard/ConnectedAccountSuccess";
 import ConnectedAccountFailed from "../Pages/Dashboard/ConnectedAccountFailed";
 import PublicPrivacyPolicy from "../Pages/Dashboard/PublicPolicy";
+import AccountDeletionGuide from "../Pages/Dashboard/AccountCreatePage";
 
 const router = createBrowserRouter([
   {
@@ -255,6 +256,10 @@ const router = createBrowserRouter([
   {
     path: "/privacy",
     element: <PublicPrivacyPolicy />,
+  },
+  {
+    path: "/account-delete",
+    element: <AccountDeletionGuide />,
   },
 
   {
