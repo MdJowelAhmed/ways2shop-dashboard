@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Card, Button, Modal, Form, Input, List, message, Select } from "antd";
+import { Card, Button, Modal, Form, Input, List, message, Select, Radio } from "antd";
 import {
   EditOutlined,
   PlusOutlined,
@@ -12,74 +12,35 @@ import SubscriptionHeadingIcon from "../../assets/subscription-heading.png";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import {
+  useCreateSubscriptionPackageMutation,
+  useUpdateSubscriptionPackageMutation,
+  useGetAllSubscriptionPackageQuery,
+} from "../../redux/apiSlices/subscriptionPackageApi";
 
 const PackagesPlans = () => {
-  const defaultPackages = [
-    {
-      id: 1,
-      title: "Basic Plan",
-      description: "Billed annually.",
-      price: 0,
-      duration: "1 month",
-      features: [
-        "5 User Accounts",
-        "Basic Analytics",
-        "24/7 Support",
-        "10GB Storage",
-        "Email Integration",
-      ],
-      popular: false,
-      active: true,
-    },
-    {
-      id: 2,
-      title: "Gold Plan",
-      description: "Billed annually.",
-      price: 20,
-      duration: "6 months",
-      features: [
-        "25 User Accounts",
-        "Advanced Analytics",
-        "24/7 Priority Support",
-        "50GB Storage",
-        "Email & CRM Integration",
-      ],
-      popular: true,
-      active: false,
-    },
-    {
-      id: 3,
-      title: "Premium Plan",
-      description: "Billed annually.",
-      price: 40,
-      duration: "1 year",
-      features: [
-        "Unlimited User Accounts",
-        "Enterprise Analytics",
-        "Dedicated Account Manager",
-        "Unlimited Storage",
-        "Complete System Integration",
-      ],
-      popular: false,
-      active: true,
-    }
-  ];
-
-  const [packages, setPackages] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [currentPackage, setCurrentPackage] = useState(null);
+  const [selectedPlatform, setSelectedPlatform] = useState("google");
   const [form] = Form.useForm();
 
-  useEffect(() => {
-    setPackages(defaultPackages);
-  }, []);
+  // API hooks
+  const { data: packagesData, isLoading: isLoadingPackages, refetch } = useGetAllSubscriptionPackageQuery([]);
+  const [createPackage, { isLoading: isCreating }] = useCreateSubscriptionPackageMutation();
+  const [updatePackage, { isLoading: isUpdating }] = useUpdateSubscriptionPackageMutation();
 
-  const togglePackageStatus = (id) => {
-    setPackages((prev) =>
-      prev.map((pkg) => (pkg.id === id ? { ...pkg, active: !pkg.active } : pkg))
-    );
-    message.success("Package status updated");
+  // Extract packages from API response
+  const packages = packagesData?.data || [];
+
+  const togglePackageStatus = async (id, currentStatus) => {
+    try {
+      await updatePackage({ id, data: { isActive: !currentStatus } }).unwrap();
+      refetch();
+      message.success("Package status updated");
+    } catch (error) {
+      message.error(error?.data?.message || "Failed to update package status");
+    }
   };
 
   const showModal = (pkg = null) => {
@@ -88,21 +49,30 @@ const PackagesPlans = () => {
     setIsModalOpen(true);
 
     if (pkg) {
+      const platform = pkg.googleProductId ? "google" : "apple";
+      setSelectedPlatform(platform);
+
       form.setFieldsValue({
         title: pkg.title,
         description: pkg.description,
         price: Number(pkg.price),
-        duration: pkg.duration,
+        billingCycle: pkg.billingCycle || "monthly",
+        platform: platform,
+        productId: pkg.googleProductId || pkg.appleProductId || "",
         features: pkg.features || [],
-        popular: pkg.popular || false,
+        bookingLimit: pkg.bookingLimit || 0,
+        isActive: pkg.isActive !== undefined ? pkg.isActive : true,
       });
     } else {
+      setSelectedPlatform("google");
       form.resetFields();
+      form.setFieldsValue({ platform: "google", isActive: true, billingCycle: "monthly" });
     }
   };
 
   const handleCancel = () => {
     setIsModalOpen(false);
+    setSelectedPlatform("google");
     form.resetFields();
   };
 
@@ -115,9 +85,11 @@ const PackagesPlans = () => {
       confirmButtonColor: "#d33",
       cancelButtonColor: "#023F86",
       confirmButtonText: "Yes, delete it!",
-    }).then((result) => {
+    }).then(async (result) => {
       if (result.isConfirmed) {
-        setPackages(packages.filter((pkg) => pkg.id !== id));
+        // TODO: Implement delete API call when backend is ready
+        // await deletePackage(id).unwrap();
+        refetch();
         Swal.fire({
           title: "Deleted!",
           text: "The package has been deleted.",
@@ -129,31 +101,40 @@ const PackagesPlans = () => {
     });
   };
 
-  const handleSubmit = (values) => {
+  const handleSubmit = async (values) => {
     const formattedData = {
-      id: isEditing ? currentPackage.id : Date.now(),
       title: values.title,
       description: values.description,
       price: Number(values.price),
-      duration: values.duration,
+      billingCycle: values.billingCycle,
       features: values.features.filter((f) => f.trim() !== ""),
-      popular: values.popular || false,
+      isActive: values.isActive !== undefined ? values.isActive : true,
+      bookingLimit: Number(values.bookingLimit),
     };
 
-    if (isEditing) {
-      setPackages(
-        packages.map((pkg) =>
-          pkg.id === currentPackage.id ? formattedData : pkg
-        )
-      );
-      message.success("Package updated successfully");
+    // Add platform-specific product ID
+    if (values.platform === "google") {
+      formattedData.googleProductId = values.productId;
     } else {
-      setPackages([...packages, formattedData]);
-      message.success("Package added successfully");
+      formattedData.appleProductId = values.productId;
     }
 
-    setIsModalOpen(false);
-    form.resetFields();
+    try {
+      if (isEditing) {
+        await updatePackage({ id: currentPackage._id, data: formattedData }).unwrap();
+        message.success("Package updated successfully");
+      } else {
+        await createPackage({ data: formattedData }).unwrap();
+        message.success("Package created successfully");
+      }
+
+      refetch();
+      setIsModalOpen(false);
+      setSelectedPlatform("google");
+      form.resetFields();
+    } catch (error) {
+      message.error(error?.data?.message || "Failed to save package");
+    }
   };
 
   const getCardStyle = (pkg) => {
@@ -195,16 +176,28 @@ const PackagesPlans = () => {
   return (
     <div className="pt-1 px-4">
       <div className="flex flex-col justify-end w-full items-center mb-8">
-        <p className="bg-primary px-[12px] py-[2px] text-white rounded-3xl mb-2">
-          Pricing Plan
-        </p>
-        <h2 className="text-[28px] font-semibold text-primary">
-          Plans for all sizes
-        </h2>
-        <p className="text-[15px] font-normal mb-[10px]">
-          Simple, transparent pricing that grows with you. Try any plan free for
-          30 days.
-        </p>
+        <div className="flex justify-between items-center w-full mb-4">
+          <div className="flex-1 flex flex-col items-center">
+            <p className="bg-primary px-[12px] py-[2px] text-white rounded-3xl mb-2">
+              Pricing Plan
+            </p>
+            <h2 className="text-[28px] font-semibold text-primary">
+              Plans for all sizes
+            </h2>
+            <p className="text-[15px] font-normal mb-[10px]">
+              Simple, transparent pricing that grows with you. Try any plan free for
+              30 days.
+            </p>
+          </div>
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
+            className="bg-primary text-white px-5 rounded-lg h-12 shadow-lg hover:bg-[#012F60] transition-all flex items-center"
+            onClick={() => showModal()}
+          >
+            Add Package
+          </Button>
+        </div>
         {/* <Button
           type="primary"
           icon={<PlusOutlined />}
@@ -216,7 +209,11 @@ const PackagesPlans = () => {
       </div>
       <div className="flex justify-center">
         <div className="w-3/4 mb-6">
-          {packages.length === 0 ? (
+          {isLoadingPackages ? (
+            <div className="text-center py-12">
+              <p className="text-lg text-gray-500">Loading packages...</p>
+            </div>
+          ) : packages.length === 0 ? (
             <div className="text-center py-12 text-gray-500">
               <p className="text-lg">No packages available.</p>
               <p>
@@ -255,12 +252,32 @@ const PackagesPlans = () => {
                       </h3>
                       <div className="mb-2">
                         <span className="text-secondary font-semibold text-[38px]">
-                          ${pkg.price}/mth
+                          ${pkg.price}
+                        </span>
+                        <span className="text-gray-500 text-[16px]">
+                          /{pkg.billingCycle || 'month'}
                         </span>
                       </div>
                       <p className="text-[16px] font-normal text-center text-[#667085]">
                         {pkg.description}
                       </p>
+
+                      {/* Platform & Product ID Info */}
+                      <div className="mt-3 w-full">
+                        <div className="flex items-center justify-center gap-2 text-sm text-gray-600 mb-1">
+                          <span className="font-medium">
+                            {pkg.googleProductId ? '📱 Google Play' : '🍎 Apple Store'}
+                          </span>
+                        </div>
+                        <div className="text-xs text-gray-500 text-center">
+                          ID: {pkg.googleProductId || pkg.appleProductId || 'N/A'}
+                        </div>
+                        {pkg.bookingLimit && (
+                          <div className="text-xs text-gray-500 text-center mt-1">
+                            Booking Limit: {pkg.bookingLimit}
+                          </div>
+                        )}
+                      </div>
                     </div>
 
                     <div className="bg-gray-50 p-4 rounded-lg">
@@ -279,14 +296,13 @@ const PackagesPlans = () => {
                     </div>
 
                     <Button
-                      className={`w-full mt-12 h-12 border ${
-                        pkg.active
-                          ? "border-primary hover:!bg-primary hover:!text-white"
-                          : "border-gray-400 text-gray-400 hover:!bg-gray-400 hover:!text-white"
-                      }`}
-                      onClick={() => togglePackageStatus(pkg.id)}
+                      className={`w-full mt-12 h-12 border ${pkg.active
+                        ? "border-primary hover:!bg-primary hover:!text-white"
+                        : "border-gray-400 text-gray-400 hover:!bg-gray-400 hover:!text-white"
+                        }`}
+                      onClick={() => togglePackageStatus(pkg._id, pkg.isActive)}
                     >
-                      {pkg.active ? "Turn Off" : "Turn On"}
+                      {pkg.isActive ? "Turn Off" : "Turn On"}
                     </Button>
                   </Card>
                 </div>
@@ -310,16 +326,17 @@ const PackagesPlans = () => {
             label="Package Title"
             rules={[{ required: true, message: "Title is required" }]}
           >
-            <Input placeholder="e.g. Basic Plan" />
+            <Input placeholder="e.g. Pro yearly Plan" />
           </Form.Item>
+
           <Form.Item
             name="description"
             label="Description"
             rules={[{ required: true, message: "Description is required" }]}
           >
             <Input.TextArea
-              rows={4}
-              placeholder="Short description of what this package offers"
+              rows={3}
+              placeholder="Unlock premium features for a month"
             />
           </Form.Item>
 
@@ -330,20 +347,58 @@ const PackagesPlans = () => {
               rules={[{ required: true, message: "Price is required" }]}
               className="w-1/2"
             >
-              <Input type="number" prefix="$" placeholder="29.99" />
+              <Input type="number" prefix="$" placeholder="90.0" step="0.01" />
             </Form.Item>
             <Form.Item
-              name="duration"
-              label="Duration"
-              rules={[{ required: true, message: "Duration is required" }]}
+              name="billingCycle"
+              label="Billing Cycle"
+              rules={[{ required: true, message: "Billing cycle is required" }]}
               className="w-1/2"
             >
-              <Select placeholder="Select duration">
-                <Select.Option value="1 month">1 Month</Select.Option>
-                <Select.Option value="3 months">3 Months</Select.Option>
-                <Select.Option value="6 months">6 Months</Select.Option>
-                <Select.Option value="1 year">1 Year</Select.Option>
+              <Select placeholder="Select billing cycle">
+                <Select.Option value="monthly">Monthly</Select.Option>
+                <Select.Option value="yearly">Yearly</Select.Option>
               </Select>
+            </Form.Item>
+          </div>
+
+          <Form.Item
+            name="bookingLimit"
+            label="Booking Limit"
+            rules={[{ required: true, message: "Booking limit is required" }]}
+          >
+            <Input type="number" placeholder="10" min="0" />
+          </Form.Item>
+
+          {/* App Configuration Section */}
+          <div className="bg-gray-50 p-4 rounded-lg mb-4">
+            <h3 className="text-base font-semibold mb-3">App Configuration</h3>
+
+            <Form.Item
+              name="platform"
+              label="Platform"
+              rules={[{ required: true, message: "Platform is required" }]}
+            >
+              <Radio.Group
+                onChange={(e) => setSelectedPlatform(e.target.value)}
+                value={selectedPlatform}
+              >
+                <Radio value="google">Google Play</Radio>
+                <Radio value="apple">Apple App Store</Radio>
+              </Radio.Group>
+            </Form.Item>
+
+            <Form.Item
+              name="productId"
+              label={selectedPlatform === "google" ? "Google Product ID" : "Apple Product ID"}
+              rules={[{ required: true, message: "Product ID is required" }]}
+              extra={
+                selectedPlatform === "google"
+                  ? "This ID must match the product ID configured in Google Play Console."
+                  : "This ID must match the product ID configured in Apple App Store Connect."
+              }
+            >
+              <Input placeholder={selectedPlatform === "google" ? "e.g. basic_03" : "e.g. pro.yearly.plan"} />
             </Form.Item>
           </div>
 
@@ -368,6 +423,7 @@ const PackagesPlans = () => {
             <Button
               type="primary"
               htmlType="submit"
+              loading={isCreating || isUpdating}
               className="bg-primary text-white rounded-lg hover:bg-[#012F60] transition-all h-auto py-2 px-6"
               size="large"
             >

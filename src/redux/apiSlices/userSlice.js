@@ -33,26 +33,7 @@ const userManagementApi = api.injectEndpoints({
       invalidatesTags: ["User"],
     }),
 
-    // Get user details by ID
-    // getUserDetails: builder.query({
-    //   query: (userId) => {
-    //     return {
-    //       url: `/users/${userId}`,
-    //       method: "GET",
-    //     };
-    //   },
-    //   transformResponse: (response) => {
-    //     let parsed;
-    //     try {
-    //       parsed =
-    //         typeof response === "string" ? JSON.parse(response) : response;
-    //     } catch (e) {
-    //       parsed = response;
-    //     }
 
-    //     return parsed.data;
-    //   },
-    // }),
   }),
 });
 

@@ -108,15 +108,15 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
         </Link>
       ),
     },
-    // {
-    //   key: "/subscription",
-    //   icon: renderIcon(SubscriptionManagement, "/subscription"),
-    //   label: (
-    //     <Link to="/subscription">
-    //       {collapsed ? "" : "Subscription Package"}
-    //     </Link>
-    //   ),
-    // },
+    {
+      key: "/subscription",
+      icon: renderIcon(SubscriptionManagement, "/subscription"),
+      label: (
+        <Link to="/subscription">
+          {collapsed ? "" : "Subscription Package"}
+        </Link>
+      ),
+    },
     // {
     //   key: "/promotionManagement",
     //   icon: renderIcon(PromotionManagement, "/promotionManagement"),
