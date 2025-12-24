@@ -227,7 +227,7 @@ const PackagesPlans = () => {
                     bordered={false}
                     className={`${getCardStyle(
                       pkg
-                    )} transition-transform duration-300`}
+                    )} transition-transform duration-300 h-full flex flex-col`}
                   >
                     <div className="flex justify-end mb-2">
                       <div className="flex gap-2">
@@ -278,7 +278,7 @@ const PackagesPlans = () => {
                       </div>
                     </div>
 
-                    <div className="bg-gray-50 p-4 rounded-lg">
+                    <div className="bg-gray-50 p-4 rounded-lg flex-grow overflow-y-auto">
                       <List
                         size="small"
                         dataSource={pkg.features}
