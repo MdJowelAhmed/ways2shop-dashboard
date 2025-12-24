@@ -178,16 +178,14 @@ const PackagesPlans = () => {
       <div className="flex flex-col justify-end w-full items-center mb-8">
         <div className="flex justify-between items-center w-full mb-4">
           <div className="flex-1 flex flex-col items-center">
-            <p className="bg-primary px-[12px] py-[2px] text-white rounded-3xl mb-2">
-              Pricing Plan
-            </p>
+          
             <h2 className="text-[28px] font-semibold text-primary">
-              Plans for all sizes
+             All Packages & Plans
             </h2>
-            <p className="text-[15px] font-normal mb-[10px]">
+            {/* <p className="text-[15px] font-normal mb-[10px]">
               Simple, transparent pricing that grows with you. Try any plan free for
               30 days.
-            </p>
+            </p> */}
           </div>
           <Button
             type="primary"
@@ -382,6 +380,7 @@ const PackagesPlans = () => {
               <Radio.Group
                 onChange={(e) => setSelectedPlatform(e.target.value)}
                 value={selectedPlatform}
+                disabled={isEditing}
               >
                 <Radio value="google">Google Play</Radio>
                 <Radio value="apple">Apple App Store</Radio>
@@ -398,7 +397,7 @@ const PackagesPlans = () => {
                   : "This ID must match the product ID configured in Apple App Store Connect."
               }
             >
-              <Input placeholder={selectedPlatform === "google" ? "e.g. basic_03" : "e.g. pro.yearly.plan"} className="h-[44px]" />
+              <Input disabled={isEditing} placeholder={selectedPlatform === "google" ? "e.g. basic_03" : "e.g. pro.yearly.plan"} className="h-[44px]" />
             </Form.Item>
           </div>
 
