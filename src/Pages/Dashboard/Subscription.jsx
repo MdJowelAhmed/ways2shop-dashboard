@@ -1,5 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { Card, Button, Modal, Form, Input, List, message, Select, Radio } from "antd";
+import {
+  Card,
+  Button,
+  Modal,
+  Form,
+  Input,
+  List,
+  message,
+  Select,
+  Radio,
+} from "antd";
 import {
   EditOutlined,
   PlusOutlined,
@@ -26,9 +36,15 @@ const PackagesPlans = () => {
   const [form] = Form.useForm();
 
   // API hooks
-  const { data: packagesData, isLoading: isLoadingPackages, refetch } = useGetAllSubscriptionPackageQuery([]);
-  const [createPackage, { isLoading: isCreating }] = useCreateSubscriptionPackageMutation();
-  const [updatePackage, { isLoading: isUpdating }] = useUpdateSubscriptionPackageMutation();
+  const {
+    data: packagesData,
+    isLoading: isLoadingPackages,
+    refetch,
+  } = useGetAllSubscriptionPackageQuery([]);
+  const [createPackage, { isLoading: isCreating }] =
+    useCreateSubscriptionPackageMutation();
+  const [updatePackage, { isLoading: isUpdating }] =
+    useUpdateSubscriptionPackageMutation();
 
   // Extract packages from API response
   const packages = packagesData?.data || [];
@@ -66,7 +82,11 @@ const PackagesPlans = () => {
     } else {
       setSelectedPlatform("google");
       form.resetFields();
-      form.setFieldsValue({ platform: "google", isActive: true, billingCycle: "monthly" });
+      form.setFieldsValue({
+        platform: "google",
+        isActive: true,
+        billingCycle: "monthly",
+      });
     }
   };
 
@@ -121,7 +141,10 @@ const PackagesPlans = () => {
 
     try {
       if (isEditing) {
-        await updatePackage({ id: currentPackage._id, data: formattedData }).unwrap();
+        await updatePackage({
+          id: currentPackage._id,
+          data: formattedData,
+        }).unwrap();
         message.success("Package updated successfully");
       } else {
         await createPackage({ data: formattedData }).unwrap();
@@ -178,9 +201,8 @@ const PackagesPlans = () => {
       <div className="flex flex-col justify-end w-full items-center mb-8">
         <div className="flex justify-between items-center w-full mb-4">
           <div className="flex-1 flex flex-col items-center">
-          
             <h2 className="text-[28px] font-semibold text-primary">
-             All Packages & Plans
+              All Packages & Plans
             </h2>
             {/* <p className="text-[15px] font-normal mb-[10px]">
               Simple, transparent pricing that grows with you. Try any plan free for
@@ -253,7 +275,7 @@ const PackagesPlans = () => {
                           ${pkg.price}
                         </span>
                         <span className="text-gray-500 text-[16px]">
-                          /{pkg.billingCycle || 'month'}
+                          /{pkg.billingCycle || "month"}
                         </span>
                       </div>
                       <p className="text-[16px] font-normal text-center text-[#667085]">
@@ -264,11 +286,14 @@ const PackagesPlans = () => {
                       <div className="mt-3 w-full">
                         <div className="flex items-center justify-center gap-2 text-sm text-gray-600 mb-1">
                           <span className="font-medium">
-                            {pkg.googleProductId ? '📱 Google Play' : '🍎 Apple Store'}
+                            {pkg.googleProductId
+                              ? "📱 Google Play"
+                              : "🍎 Apple Store"}
                           </span>
                         </div>
                         <div className="text-xs text-gray-500 text-center">
-                          ID: {pkg.googleProductId || pkg.appleProductId || 'N/A'}
+                          ID:{" "}
+                          {pkg.googleProductId || pkg.appleProductId || "N/A"}
                         </div>
                         {pkg.bookingLimit && (
                           <div className="text-xs text-gray-500 text-center mt-1">
@@ -316,42 +341,55 @@ const PackagesPlans = () => {
         onCancel={handleCancel}
         footer={null}
         className="rounded-lg"
-        width={600}
+        width={700}
       >
         <Form form={form} layout="vertical" onFinish={handleSubmit}>
-          <Form.Item
-            name="title"
-            label="Package Title"
-            rules={[{ required: true, message: "Title is required" }]}
-          >
-            <Input placeholder="e.g. Pro yearly Plan" className="h-[44px]"/>
-          </Form.Item>
+          <div className="flex gap-4">
+            <Form.Item
+              name="title"
+              label="Package Title"
+              rules={[{ required: true, message: "Title is required" }]}
+              className="w-1/2 mb-2"
+            >
+              <Input placeholder="e.g. Pro yearly Plan" className="h-[44px] " />
+            </Form.Item>
 
-          <Form.Item
-            name="description"
-            label="Description"
-            rules={[{ required: true, message: "Description is required" }]}
-          >
-            <Input.TextArea
-              rows={3}
-              placeholder="Unlock premium features for a month"
-            />
-          </Form.Item>
+            <Form.Item
+              name="bookingLimit"
+              label="Booking Limit"
+              rules={[{ required: true, message: "Booking limit is required" }]}
+              className="w-1/2 mb-2"
+            >
+              <Input
+                type="number"
+                placeholder="10"
+                min="0"
+                className="h-[44px] "
+              />
+            </Form.Item>
+          </div>
 
           <div className="flex gap-4">
             <Form.Item
               name="price"
               label="Price"
+              extra="Price must be the same in Google/Apple consoles"
               rules={[{ required: true, message: "Price is required" }]}
-              className="w-1/2"
+              className="w-1/2 mb-2"
             >
-              <Input type="number" prefix="$" placeholder="90.0" step="0.01" className="h-[44px]" />
+              <Input
+                type="number"
+                prefix="$"
+                placeholder="90.0"
+                step="0.01"
+                className="h-[44px]"
+              />
             </Form.Item>
             <Form.Item
               name="billingCycle"
               label="Billing Cycle"
               rules={[{ required: true, message: "Billing cycle is required" }]}
-              className="w-1/2"
+              className="w-1/2 mb-2"
             >
               <Select placeholder="Select billing cycle" className="h-[44px]">
                 <Select.Option value="monthly">Monthly</Select.Option>
@@ -361,21 +399,26 @@ const PackagesPlans = () => {
           </div>
 
           <Form.Item
-            name="bookingLimit"
-            label="Booking Limit"
-            rules={[{ required: true, message: "Booking limit is required" }]}
+            name="description"
+            label="Description"
+            rules={[{ required: true, message: "Description is required" }]}
+            className="mb-2"
           >
-            <Input type="number" placeholder="10" min="0" className="h-[44px]" />
+            <Input.TextArea
+              rows={3}
+              placeholder="Unlock premium features for a month"
+            />
           </Form.Item>
 
           {/* App Configuration Section */}
-          <div className="bg-gray-50 p-4 rounded-lg mb-4">
-            <h3 className="text-base font-semibold mb-3">App Configuration</h3>
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <h3 className="text-base font-semibold ">App Configuration</h3>
 
             <Form.Item
               name="platform"
               label="Platform"
               rules={[{ required: true, message: "Platform is required" }]}
+              className="mb-0"
             >
               <Radio.Group
                 onChange={(e) => setSelectedPlatform(e.target.value)}
@@ -389,15 +432,28 @@ const PackagesPlans = () => {
 
             <Form.Item
               name="productId"
-              label={selectedPlatform === "google" ? "Google Product ID" : "Apple Product ID"}
+              label={
+                selectedPlatform === "google"
+                  ? "Google Product ID"
+                  : "Apple Product ID"
+              }
               rules={[{ required: true, message: "Product ID is required" }]}
               extra={
                 selectedPlatform === "google"
                   ? "This ID must match the product ID configured in Google Play Console."
                   : "This ID must match the product ID configured in Apple App Store Connect."
               }
+              className="mb-0"
             >
-              <Input disabled={isEditing} placeholder={selectedPlatform === "google" ? "e.g. basic_03" : "e.g. pro.yearly.plan"} className="h-[44px]" />
+              <Input
+                disabled={isEditing}
+                placeholder={
+                  selectedPlatform === "google"
+                    ? "e.g. basic_03"
+                    : "e.g. pro.yearly.plan"
+                }
+                className="h-[44px]"
+              />
             </Form.Item>
           </div>
 
@@ -411,7 +467,7 @@ const PackagesPlans = () => {
             <FeaturedInput />
           </Form.Item>
 
-          <div className="flex justify-end gap-3 mt-6">
+          <div className="flex justify-end gap-3 mt-4">
             <Button
               onClick={handleCancel}
               size="large"
