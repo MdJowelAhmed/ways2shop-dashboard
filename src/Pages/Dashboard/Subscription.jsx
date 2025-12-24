@@ -242,11 +242,11 @@ const PackagesPlans = () => {
                     </div>
 
                     <div className="flex flex-col justify-center items-center mb-4">
-                      <img
+                      {/* <img
                         src={SubscriptionHeadingIcon}
                         alt="Subscription Icon"
                         className="w-[40px] h-[40px] mb-4"
-                      />
+                      /> */}
                       <h3 className="text-[20px] font-semibold text-primary mb-[8px]">
                         {pkg.title}
                       </h3>
@@ -295,7 +295,7 @@ const PackagesPlans = () => {
                       />
                     </div>
 
-                    <Button
+                    {/* <Button
                       className={`w-full mt-12 h-12 border ${pkg.active
                         ? "border-primary hover:!bg-primary hover:!text-white"
                         : "border-gray-400 text-gray-400 hover:!bg-gray-400 hover:!text-white"
@@ -303,7 +303,7 @@ const PackagesPlans = () => {
                       onClick={() => togglePackageStatus(pkg._id, pkg.isActive)}
                     >
                       {pkg.isActive ? "Turn Off" : "Turn On"}
-                    </Button>
+                    </Button> */}
                   </Card>
                 </div>
               ))}
@@ -326,7 +326,7 @@ const PackagesPlans = () => {
             label="Package Title"
             rules={[{ required: true, message: "Title is required" }]}
           >
-            <Input placeholder="e.g. Pro yearly Plan" />
+            <Input placeholder="e.g. Pro yearly Plan" className="h-[44px]"/>
           </Form.Item>
 
           <Form.Item
@@ -347,7 +347,7 @@ const PackagesPlans = () => {
               rules={[{ required: true, message: "Price is required" }]}
               className="w-1/2"
             >
-              <Input type="number" prefix="$" placeholder="90.0" step="0.01" />
+              <Input type="number" prefix="$" placeholder="90.0" step="0.01" className="h-[44px]" />
             </Form.Item>
             <Form.Item
               name="billingCycle"
@@ -355,7 +355,7 @@ const PackagesPlans = () => {
               rules={[{ required: true, message: "Billing cycle is required" }]}
               className="w-1/2"
             >
-              <Select placeholder="Select billing cycle">
+              <Select placeholder="Select billing cycle" className="h-[44px]">
                 <Select.Option value="monthly">Monthly</Select.Option>
                 <Select.Option value="yearly">Yearly</Select.Option>
               </Select>
@@ -367,7 +367,7 @@ const PackagesPlans = () => {
             label="Booking Limit"
             rules={[{ required: true, message: "Booking limit is required" }]}
           >
-            <Input type="number" placeholder="10" min="0" />
+            <Input type="number" placeholder="10" min="0" className="h-[44px]" />
           </Form.Item>
 
           {/* App Configuration Section */}
@@ -398,7 +398,7 @@ const PackagesPlans = () => {
                   : "This ID must match the product ID configured in Apple App Store Connect."
               }
             >
-              <Input placeholder={selectedPlatform === "google" ? "e.g. basic_03" : "e.g. pro.yearly.plan"} />
+              <Input placeholder={selectedPlatform === "google" ? "e.g. basic_03" : "e.g. pro.yearly.plan"} className="h-[44px]" />
             </Form.Item>
           </div>
 
