@@ -22,9 +22,18 @@ const authSlice = api.injectEndpoints({
       transformResponse: (data) => {
         return data;
       },
-      transformErrorResponse: ({ data }) => {
-        const { message } = data;
-        return message;
+      transformErrorResponse: (response) => {
+        console.log("Error response:", response);
+      
+        if (response?.data?.message) {
+          return response.data.message;
+        }
+      
+        if (response?.error) {
+          return response.error;
+        }
+      
+        return "Unknown error occurred";
       },
     }),
     forgotPassword: builder.mutation({
